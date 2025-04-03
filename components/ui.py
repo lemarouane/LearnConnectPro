@@ -21,21 +21,76 @@ ICONS = {
 
 def apply_custom_styles():
     """Apply custom CSS to the Streamlit app"""
-    with open('styles/custom.css', 'r') as f:
-        css = f.read()
-    st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
+    try:
+        with open('styles/custom.css', 'r') as f:
+            css = f.read()
+        st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
+    except Exception as e:
+        st.error(f"Error loading custom styles: {str(e)}")
+        # Fallback inline CSS for essential styling
+        st.markdown("""
+        <style>
+            .sidebar-icon {
+                margin-right: 0.5rem;
+                vertical-align: middle;
+                width: 20px;
+                display: inline-block;
+            }
+            .main-header {
+                font-size: 2rem;
+                font-weight: 800;
+                color: #1E3A8A;
+                margin-bottom: 1rem;
+                text-align: center;
+            }
+        </style>
+        """, unsafe_allow_html=True)
 
 def create_sidebar_icon(icon_key):
     """Create HTML for a sidebar icon"""
     return f'<img src="{ICONS[icon_key]}" class="sidebar-icon">'
 
 def render_sidebar_menu():
-    """Render the sidebar menu with icons"""
+    """Render the sidebar menu with icons based on user role"""
+    # Apply custom inline CSS for sidebar
+    st.markdown("""
+    <style>
+        [data-testid="stSidebar"] {
+            background-color: #1E293B;
+            color: white;
+        }
+        [data-testid="stSidebar"] button {
+            background-color: transparent !important;
+            color: white !important;
+            border: none !important;
+            text-align: left !important;
+            font-weight: normal !important;
+            border-radius: 0 !important;
+            margin-bottom: 0.25rem !important;
+        }
+        [data-testid="stSidebar"] button:hover {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        [data-testid="stSidebar"] hr {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
+            color: white !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # User profile section
     st.sidebar.markdown("""
-    <div class="user-profile">
-        <div class="user-avatar">{}</div>
-        <div class="user-name">{}</div>
-        <div class="user-role">{}</div>
+    <div style="padding: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 1rem; text-align: center;">
+        <div style="width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 0.5rem; background-color: #3B82F6; 
+                  display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; color: white;">
+            {}
+        </div>
+        <div style="font-weight: 600; margin-bottom: 0.25rem; color: white;">{}</div>
+        <div style="font-size: 0.8rem; opacity: 0.8; color: white;">{}</div>
     </div>
     """.format(
         st.session_state.username[0].upper(),
@@ -43,29 +98,34 @@ def render_sidebar_menu():
         t(st.session_state.role)
     ), unsafe_allow_html=True)
     
-    # Add a separator
-    st.sidebar.markdown('<hr>', unsafe_allow_html=True)
-    
-    # Sidebar menu with icons
-    menu_items = {
-        'dashboard': t('dashboard'),
-        'content': t('content_management'),
-        'users': t('user_management'),
-        'levels': t('level_management'),
-        'subjects': t('subject_management'),
-        'activity': t('activity_logs'),
-        'profile': t('profile'),
-        'settings': t('settings')
-    }
+    # Define menu items based on user role
+    if st.session_state.role == "admin":
+        # Admin menu items
+        menu_items = {
+            'dashboard': t('dashboard'),
+            'content': t('content_management'),
+            'users': t('user_management'),
+            'levels': t('level_management'),
+            'subjects': t('subject_management'),
+            'activity': t('activity_logs'),
+            'settings': t('settings')
+        }
+    else:
+        # Student menu items - no content management or admin options
+        menu_items = {
+            'dashboard': t('dashboard'),
+            'profile': t('profile'),
+            'settings': t('settings')
+        }
     
     selected_menu = None
     
     for key, label in menu_items.items():
         # Create a row with icon and text
         menu_item_html = f"""
-        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+        <div style="display: flex; align-items: center; padding: 0.5rem 1rem; border-radius: 4px;">
             {create_sidebar_icon(key)}
-            <span style="margin-left: 8px;">{label}</span>
+            <span style="margin-left: 0.5rem; color: white;">{label}</span>
         </div>
         """
         
@@ -74,13 +134,13 @@ def render_sidebar_menu():
             st.session_state.menu_selection = key
     
     # Add a separator
-    st.sidebar.markdown('<hr>', unsafe_allow_html=True)
+    st.sidebar.markdown('<hr style="border-color: rgba(255, 255, 255, 0.1);">', unsafe_allow_html=True)
     
     # Logout button at the bottom
     logout_html = f"""
-    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+    <div style="display: flex; align-items: center; padding: 0.5rem 1rem; border-radius: 4px;">
         {create_sidebar_icon('logout')}
-        <span style="margin-left: 8px; color: #EF4444;">{t('logout')}</span>
+        <span style="margin-left: 0.5rem; color: #EF4444;">{t('logout')}</span>
     </div>
     """
     

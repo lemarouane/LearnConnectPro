@@ -69,19 +69,11 @@ def student_dashboard():
             st.info("You haven't been assigned to any courses in this subject yet.")
             return
         
-        # Filter options
-        st.subheader("Filter Courses")
-        difficulties = ["All"] + content_manager.get_difficulty_levels()
-        selected_difficulty = st.selectbox("Difficulty Level", difficulties)
-        
-        # Apply filters
-        if selected_difficulty != "All":
-            filtered_courses = [c for c in courses if c["difficulty"] == selected_difficulty]
-        else:
-            filtered_courses = courses
+        # Simplified view - no difficulty filters for students
+        filtered_courses = courses
         
         if not filtered_courses:
-            st.info(f"No courses found with difficulty: {selected_difficulty}")
+            st.info("No courses found.")
             return
         
         # Display courses as cards
@@ -117,15 +109,14 @@ def student_dashboard():
                 st.write(f"**Email:** {user['email'] or 'Not provided'}")
                 st.write(f"**Phone:** {user['phone'] or 'Not provided'}")
             
-            # Display assigned courses statistics
+            # Display assigned courses statistics (without difficulty breakdown)
             st.subheader("Course Statistics")
             
             total_courses = len(db.get_user_courses(user['id']))
-            courses_by_difficulty = {}
             
-            for diff in content_manager.get_difficulty_levels():
-                diff_courses = db.get_user_courses(user['id'], difficulty=diff)
-                courses_by_difficulty[diff] = len(diff_courses)
+            # Get courses by type instead of difficulty
+            pdf_courses = len([c for c in db.get_user_courses(user['id']) if c.get('content_type') == 'PDF'])
+            video_courses = len([c for c in db.get_user_courses(user['id']) if c.get('content_type') == 'YouTube'])
             
             col1, col2, col3 = st.columns(3)
             
@@ -133,10 +124,10 @@ def student_dashboard():
                 st.metric("Total Courses", total_courses)
             
             with col2:
-                st.metric("Easy Courses", courses_by_difficulty.get("easy", 0))
+                st.metric("PDF Materials", pdf_courses)
             
             with col3:
-                st.metric("Hard Courses", courses_by_difficulty.get("hard", 0))
+                st.metric("Video Courses", video_courses)
             
             # Display recent activity
             st.subheader("Recent Activity")
@@ -155,15 +146,15 @@ def display_content_card(content):
     """Display a content card in the student dashboard."""
     card_id = f"course-{content['id']}"
     
-    # Format content card with CSS classes for styling
+    # Format content card with CSS classes for styling - no difficulty shown for students
     card_html = f"""
-    <div class="content-card">
-        <div class="content-card-header">
-            <h3>{content['title']}</h3>
-            <span class="difficulty-badge difficulty-{content['difficulty']}">{content['difficulty'].title()}</span>
+    <div class="content-card" style="background-color: white; border-radius: 10px; padding: 15px; 
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 15px; border-left: 4px solid #3B82F6;">
+        <div class="content-card-header" style="margin-bottom: 10px;">
+            <h3 style="margin: 0; color: #1E3A8A; font-size: 1.25rem;">{content['title']}</h3>
         </div>
-        <p><strong>Subject:</strong> {content['subject_name']}</p>
-        <p><strong>Type:</strong> {content['content_type']}</p>
+        <p style="margin: 5px 0;"><strong>Subject:</strong> {content['subject_name']}</p>
+        <p style="margin: 5px 0;"><strong>Type:</strong> {content['content_type']}</p>
     </div>
     """
     
@@ -192,14 +183,12 @@ def display_content_viewer(content_id):
     
     st.title(content['title'])
     
-    # Course metadata
-    col1, col2, col3 = st.columns(3)
+    # Course metadata (without difficulty information for students)
+    col1, col2 = st.columns(2)
     with col1:
         st.write(f"**Subject:** {content['subject_name']}")
     with col2:
         st.write(f"**Level:** {content['level_name']}")
-    with col3:
-        st.write(f"**Difficulty:** {content['difficulty'].title()}")
     
     # Course description
     if content['description']:
