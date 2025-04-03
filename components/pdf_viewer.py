@@ -55,17 +55,21 @@ def pdf_viewer(encrypted_path, title="PDF Viewer"):
                 mime="application/pdf"
             )
         
+        # Convert to base64 for inline display as a fallback method
+        with open(temp_file_path, "rb") as file:
+            base64_pdf = base64.b64encode(file.read()).decode('utf-8')
+            
+        # Use a more robust method with iframe and base64 data
+        pdf_display = f"""
+        <div style="width:100%; height:600px; overflow:hidden; border:1px solid #ccc; border-radius:5px;">
+            <iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="600" 
+                    style="border:none;" frameborder="0" allowfullscreen>
+            </iframe>
+        </div>
+        """
+        
         # Display using streamlit components
-        st.components.v1.html(
-            f"""
-            <div style="width:100%; height:600px; overflow:hidden; border:1px solid #ccc; border-radius:5px;">
-                <object data="/app/uploads/temp/{os.path.basename(temp_file_path)}" type="application/pdf" width="100%" height="600">
-                    <p>It appears your browser doesn't support PDFs. You can download the PDF file instead.</p>
-                </object>
-            </div>
-            """,
-            height=620,
-        )
+        st.components.v1.html(pdf_display, height=620)
         
         # Additional protections warning
         st.info("Note: This document is protected. Screenshots are limited to 3 per 15 minutes and are monitored.")
@@ -97,17 +101,21 @@ def pdf_preview(encrypted_path, max_height=300):
         with open(temp_file_path, 'wb') as f:
             f.write(pdf_data)
         
+        # Convert to base64 for inline display
+        with open(temp_file_path, "rb") as file:
+            base64_pdf = base64.b64encode(file.read()).decode('utf-8')
+            
+        # Use iframe with base64 data for more consistent display
+        pdf_preview = f"""
+        <div style="width:100%; height:{max_height}px; overflow:hidden; border:1px solid #ddd; border-radius:4px;">
+            <iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="{max_height}" 
+                    style="border:none;" frameborder="0">
+            </iframe>
+        </div>
+        """
+        
         # Display using streamlit components for preview
-        st.components.v1.html(
-            f"""
-            <div style="width:100%; height:{max_height}px; overflow:hidden; border:1px solid #ddd; border-radius:4px;">
-                <object data="/app/uploads/temp/{os.path.basename(temp_file_path)}" type="application/pdf" width="100%" height="{max_height}">
-                    <p>PDF Preview (Click to view full document)</p>
-                </object>
-            </div>
-            """,
-            height=max_height+20,
-        )
+        st.components.v1.html(pdf_preview, height=max_height+20)
         
     except Exception as e:
         st.error(f"Error displaying PDF preview: {str(e)}")
