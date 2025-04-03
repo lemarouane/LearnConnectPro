@@ -21,6 +21,131 @@ ICONS = {
 
 def apply_custom_styles():
     """Apply custom CSS to the Streamlit app"""
+    st.markdown("""
+    <style>
+    /* Global styles */
+    .stApp {
+        font-family: 'Inter', sans-serif;
+        color: #1E293B;
+    }
+    
+    /* Sidebar styles */
+    [data-testid="stSidebar"] {
+        background-color: #1E293B;
+        color: white;
+    }
+    
+    [data-testid="stSidebar"] button {
+        background-color: transparent !important;
+        color: white !important;
+        text-align: left !important;
+        font-weight: normal !important;
+        border-radius: 4px !important;
+        margin-bottom: 0.25rem !important;
+        border: none !important;
+        padding: 0.5rem 1rem !important;
+    }
+    
+    [data-testid="stSidebar"] button:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    [data-testid="stSidebar"] h3 {
+        color: #94A3B8 !important;
+        font-size: 0.8rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05rem !important;
+        margin-top: 1.5rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* Card styles */
+    .card {
+        padding: 1.5rem;
+        border-radius: 8px;
+        background-color: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.2rem;
+        border-top: 4px solid #6366F1;
+    }
+    
+    /* Notification styles */
+    .notification {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    
+    .notification-info {
+        background-color: #EFF6FF;
+        border-left: 4px solid #3B82F6;
+        color: #1E40AF;
+    }
+    
+    .notification-success {
+        background-color: #ECFDF5;
+        border-left: 4px solid #10B981;
+        color: #065F46;
+    }
+    
+    .notification-warning {
+        background-color: #FFFBEB;
+        border-left: 4px solid #F59E0B;
+        color: #92400E;
+    }
+    
+    .notification-error {
+        background-color: #FEF2F2;
+        border-left: 4px solid #EF4444;
+        color: #B91C1C;
+    }
+    
+    /* Table styles */
+    [data-testid="stTable"] {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    [data-testid="stTable"] th {
+        background-color: #F1F5F9;
+        color: #475569;
+        font-weight: 600;
+    }
+    
+    /* Button styles */
+    [data-testid="stButton"] button {
+        border-radius: 4px;
+        font-weight: 500;
+    }
+    
+    /* Input field styles */
+    [data-testid="stTextInput"] input, 
+    [data-testid="stNumberInput"] input,
+    [data-testid="stFileUploader"] .uploadInput {
+        border-radius: 4px;
+        border: 1px solid #E2E8F0;
+    }
+    
+    /* Scrollbar styles */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #F1F5F9;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: #CBD5E1;
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: #94A3B8;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     try:
         with open('styles/custom.css', 'r') as f:
             css = f.read()
@@ -52,122 +177,80 @@ def create_sidebar_icon(icon_key):
 
 def render_sidebar_menu():
     """Render the sidebar menu with icons based on user role"""
-    # Apply custom inline CSS for sidebar
-    st.markdown("""
-    <style>
-        [data-testid="stSidebar"] {
-            background-color: #1E293B;
-            color: white;
-        }
-        [data-testid="stSidebar"] button {
-            background-color: transparent !important;
-            color: white !important;
-            border: none !important;
-            text-align: left !important;
-            font-weight: normal !important;
-            border-radius: 0 !important;
-            margin-bottom: 0.25rem !important;
-        }
-        [data-testid="stSidebar"] button:hover {
-            background-color: rgba(255, 255, 255, 0.1) !important;
-        }
-        [data-testid="stSidebar"] hr {
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-            border-color: rgba(255, 255, 255, 0.1);
-        }
-        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
-            color: white !important;
-        }
-    </style>
-    """, unsafe_allow_html=True)
 
     # User profile section
-    st.sidebar.markdown("""
-    <div style="padding: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 1rem; text-align: center;">
-        <div style="width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 0.5rem; background-color: #3B82F6; 
-                  display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; color: white;">
-            {}
-        </div>
-        <div style="font-weight: 600; margin-bottom: 0.25rem; color: white;">{}</div>
-        <div style="font-size: 0.8rem; opacity: 0.8; color: white;">{}</div>
-    </div>
-    """.format(
-        st.session_state.username[0].upper(),
-        st.session_state.username,
-        t(st.session_state.role)
-    ), unsafe_allow_html=True)
+    avatar_initial = st.session_state.username[0].upper()
+    username = st.session_state.username
+    role = t(st.session_state.role)
+    
+    st.sidebar.markdown(f"### Welcome, {username}")
+    st.sidebar.markdown(f"**Role:** {role}")
+    st.sidebar.markdown("---")
     
     # Define menu items based on user role
     if st.session_state.role == "admin":
         # Admin menu items
-        menu_items = {
-            'dashboard': t('dashboard'),
-            'content': t('content_management'),
-            'users': t('user_management'),
-            'levels': t('level_management'),
-            'subjects': t('subject_management'),
-            'activity': t('activity_logs'),
-            'settings': t('settings')
-        }
+        st.sidebar.markdown("### Admin Navigation")
+        if st.sidebar.button("📊 Dashboard", key="menu_dashboard", use_container_width=True):
+            st.session_state.menu_selection = "dashboard"
+        
+        if st.sidebar.button("📚 Content Management", key="menu_content", use_container_width=True):
+            st.session_state.menu_selection = "content"
+        
+        if st.sidebar.button("👥 User Management", key="menu_users", use_container_width=True):
+            st.session_state.menu_selection = "users"
+        
+        if st.sidebar.button("🏫 Level Management", key="menu_levels", use_container_width=True):
+            st.session_state.menu_selection = "levels"
+        
+        if st.sidebar.button("📑 Subject Management", key="menu_subjects", use_container_width=True):
+            st.session_state.menu_selection = "subjects"
+        
+        if st.sidebar.button("📝 Activity Logs", key="menu_activity", use_container_width=True):
+            st.session_state.menu_selection = "activity"
+        
+        if st.sidebar.button("⚙️ Settings", key="menu_settings", use_container_width=True):
+            st.session_state.menu_selection = "settings"
     else:
         # Student menu items - no content management or admin options
-        menu_items = {
-            'dashboard': t('dashboard'),
-            'profile': t('profile'),
-            'settings': t('settings')
-        }
-    
-    selected_menu = None
-    
-    for key, label in menu_items.items():
-        # Create a row with icon and text
-        menu_item_html = f"""
-        <div style="display: flex; align-items: center; padding: 0.5rem 1rem; border-radius: 4px;">
-            {create_sidebar_icon(key)}
-            <span style="margin-left: 0.5rem; color: white;">{label}</span>
-        </div>
-        """
+        st.sidebar.markdown("### Student Navigation")
+        if st.sidebar.button("📚 My Courses", key="menu_dashboard", use_container_width=True):
+            st.session_state.menu_selection = "dashboard"
         
-        if st.sidebar.button(menu_item_html, key=f"menu_{key}", help=label, use_container_width=True):
-            selected_menu = key
-            st.session_state.menu_selection = key
+        if st.sidebar.button("👤 Profile", key="menu_profile", use_container_width=True):
+            st.session_state.menu_selection = "profile"
+        
+        if st.sidebar.button("⚙️ Settings", key="menu_settings", use_container_width=True):
+            st.session_state.menu_selection = "settings"
     
     # Add a separator
-    st.sidebar.markdown('<hr style="border-color: rgba(255, 255, 255, 0.1);">', unsafe_allow_html=True)
+    st.sidebar.markdown("---")
     
     # Logout button at the bottom
-    logout_html = f"""
-    <div style="display: flex; align-items: center; padding: 0.5rem 1rem; border-radius: 4px;">
-        {create_sidebar_icon('logout')}
-        <span style="margin-left: 0.5rem; color: #EF4444;">{t('logout')}</span>
-    </div>
-    """
-    
-    if st.sidebar.button(logout_html, key="menu_logout", help=t('logout'), use_container_width=True):
+    if st.sidebar.button("🚪 Logout", key="menu_logout", use_container_width=True):
         from auth import logout_user
         logout_user()
         st.rerun()
     
     return st.session_state.get('menu_selection', 'dashboard')
 
-def create_card(title, content, color="#3B82F6"):
+def create_card(title, content, color="#6366F1"):
     """Create a styled card with the given title and content"""
     return f"""
-    <div style="padding: 1.5rem; border-radius: 8px; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
-         margin-bottom: 1.2rem; border-left: 4px solid {color};">
-        <div style="font-size: 1.2rem; font-weight: 600; color: #1F2937; margin-bottom: 0.8rem;">{title}</div>
+    <div style="padding: 1.5rem; border-radius: 12px; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+         margin-bottom: 1.2rem; border-top: 4px solid {color};">
+        <div style="font-size: 1.2rem; font-weight: 600; color: #4F46E5; margin-bottom: 0.8rem;">{title}</div>
         <div>{content}</div>
     </div>
     """
 
-def create_stat_card(value, label, color="#3B82F6"):
+def create_stat_card(value, label, color="#8B5CF6"):
     """Create a statistical card for dashboards"""
     return f"""
-    <div style="background: linear-gradient(135deg, {color}, {color}DD); color: white; padding: 1.2rem; 
-         border-radius: 8px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); height: 100%;">
-        <div style="font-size: 2rem; font-weight: 700;">{value}</div>
-        <div style="font-size: 0.9rem; opacity: 0.8;">{label}</div>
+    <div style="background: linear-gradient(135deg, {color}, #C4B5FD); color: white; padding: 1.5rem; 
+         border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); height: 100%;">
+        <div style="font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem;">{value}</div>
+        <div style="font-size: 1rem; font-weight: 500; letter-spacing: 0.5px;">{label}</div>
     </div>
     """
 
@@ -193,25 +276,35 @@ def create_notification(message, type="info"):
 def display_header():
     """Display the app header"""
     st.markdown("""
-    <div class="app-header">
-        <div class="app-logo">
-            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAABMklEQVR4nO2UvUpDQRCFv4gWgjYiKWzsBH0EW0Et8hqCtb0+ga2FIJLGwkbERrHURrS0tLASJMklYhWIjbABC7Mb9t4EVMgPp9mZc3Z3ZhbypJAPP4U70ANcYArcAIY/8bjADXAODAOFQOyBSliZjpF5AlaAUg8lxoCDYF2uXw32egE0cYxPQKXaM7ARiLYMdnOSsB4DVd3PASWBkXz40DGSr2u/IYyBnl+Ap9gBDoF1oAl0gH25FBuS4nJM9PMwNouaO7ehyDFWqGnuJCyuRuYC5SCjI+A+RYrCaQrVk7Ayl+a+VDQF9jOKlDl3acLKSICNDPkrvFPnv0hFngJ7QD0D31hwXP+QoipQBlpAR5LdAqs6VwUec3DfAJvAhCx+ADrAuZpX0P+2+EkZavFzoA/8d30BBSI89TuUDQMAAAAASUVORK5CYII=" alt="Logo">
-            Zouhair E-learning
+    <div style="background-color: #4F46E5; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; 
+         display: flex; align-items: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span style="background-color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; 
+                  align-items: center; justify-content: center; font-weight: bold; color: #4F46E5;">Z</span>
+            <span style="font-size: 1.5rem; font-weight: 700; color: white; letter-spacing: 0.5px;">Zouhair E-learning</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 def display_main_header(title):
     """Display a main page header"""
-    st.markdown(f'<h1 class="main-header">{title}</h1>', unsafe_allow_html=True)
+    st.markdown(f'''
+    <h1 style="color: #4F46E5; font-size: 2rem; font-weight: 700; margin-bottom: 1.5rem; 
+        padding-bottom: 0.5rem; border-bottom: 2px solid #C7D2FE;">{title}</h1>
+    ''', unsafe_allow_html=True)
 
 def display_sub_header(title):
     """Display a sub header"""
-    st.markdown(f'<h2 class="sub-header">{title}</h2>', unsafe_allow_html=True)
+    st.markdown(f'''
+    <h2 style="color: #6366F1; font-size: 1.5rem; font-weight: 600; margin: 1.2rem 0 0.8rem; 
+        padding-bottom: 0.3rem; border-bottom: 1px solid #E0E7FF;">{title}</h2>
+    ''', unsafe_allow_html=True)
 
 def display_section_header(title):
     """Display a section header"""
-    st.markdown(f'<h3 class="section-header">{title}</h3>', unsafe_allow_html=True)
+    st.markdown(f'''
+    <h3 style="color: #7C3AED; font-size: 1.2rem; font-weight: 600; margin: 1rem 0 0.5rem;">{title}</h3>
+    ''', unsafe_allow_html=True)
 
 def initialize_ui():
     """Initialize the UI elements and state"""
