@@ -1032,13 +1032,14 @@ def user_management():
                                         key=f"courses_{student['id']}_{subject_id}"
                                     )
 
+                                    courses_by_subject[subject_id] = []
                                     if "All" in selected_courses:
-                                        courses_by_subject[subject_id] = [c["id"] for c in subject_courses]
+                                        courses_by_subject[subject_id].extend([c["id"] for c in subject_courses])
                                     else:
-                                        courses_by_subject[subject_id] = [
+                                        courses_by_subject[subject_id].extend([
                                             course["id"] for course in subject_courses 
                                             if course["title"] in selected_courses
-                                        ]
+                                        ])
 
                                 # Difficulty selection
                                 difficulty = st.selectbox(
