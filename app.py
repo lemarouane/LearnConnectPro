@@ -8,7 +8,7 @@ import sqlite3
 
 # Configure Streamlit page
 st.set_page_config(
-    page_title="Zouhair E-Learning Platform",
+    page_title="Plateforme E-Learning Zouhair",
     page_icon="📚",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -28,19 +28,19 @@ def main():
     
     # Display logout button in sidebar if logged in
     if st.session_state.logged_in:
-        st.sidebar.title(f"Welcome, {st.session_state.full_name or st.session_state.username}")
+        st.sidebar.title(f"Bienvenue, {st.session_state.full_name or st.session_state.username}")
         
         # Display user role
-        role_badge = "👨‍💼 Admin" if st.session_state.role == "admin" else "👨‍🎓 Student"
-        st.sidebar.markdown(f"**Role:** {role_badge}")
+        role_badge = "👨‍💼 Administrateur" if st.session_state.role == "admin" else "👨‍🎓 Étudiant"
+        st.sidebar.markdown(f"**Rôle:** {role_badge}")
         
         # Display validation status for students
         if st.session_state.role == "student":
-            validation_status = "✅ Validated" if st.session_state.validated else "❌ Not Validated"
-            st.sidebar.markdown(f"**Status:** {validation_status}")
+            validation_status = "✅ Validé" if st.session_state.validated else "❌ Non validé"
+            st.sidebar.markdown(f"**Statut:** {validation_status}")
         
         # Logout button
-        if st.sidebar.button("Logout"):
+        if st.sidebar.button("Déconnexion"):
             logout_user()
             st.rerun()
         
@@ -62,20 +62,20 @@ def main():
                 student_dashboard()
             else:
                 # Show awaiting validation message
-                st.warning("Your account is awaiting validation by an administrator. Please check back later.")
+                st.warning("Votre compte est en attente de validation par un administrateur. Veuillez vérifier ultérieurement.")
                 
                 st.markdown("""
-                ## What happens next?
+                ## Que se passe-t-il ensuite ?
                 
-                1. An administrator will review your registration details.
-                2. Once approved, you'll be able to access the platform's content.
-                3. You'll be assigned to specific levels, subjects, and courses based on your needs.
+                1. Un administrateur examinera vos informations d'inscription.
+                2. Une fois approuvé, vous pourrez accéder au contenu de la plateforme.
+                3. Vous serez affecté à des niveaux, des sujets et des cours spécifiques en fonction de vos besoins.
                 
-                Thank you for your patience!
+                Merci pour votre patience !
                 """)
         else:
             # Unknown role
-            st.error("Unknown user role. Please contact support.")
+            st.error("Rôle utilisateur inconnu. Veuillez contacter le support.")
 
 if __name__ == "__main__":
     main()

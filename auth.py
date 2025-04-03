@@ -51,39 +51,39 @@ def login_user(username, password):
         st.session_state.role = user['role']
         st.session_state.full_name = user['full_name']
         st.session_state.validated = user['validated']
-        st.session_state.login_message = f"Welcome, {user['full_name'] or username}!"
+        st.session_state.login_message = f"Bienvenue, {user['full_name'] or username}!"
         st.session_state.login_success = True
         
         # Log login activity
-        db.log_activity(user['id'], "Logged in")
+        db.log_activity(user['id'], "Connexion")
         return True
     else:
-        st.session_state.login_message = "Invalid username or password"
+        st.session_state.login_message = "Nom d'utilisateur ou mot de passe invalide"
         st.session_state.login_success = False
         return False
 
 def validate_registration_form(username, password, confirm_password, full_name, email, phone):
     """Validate registration form input."""
     if not username or not password or not full_name:
-        return False, "Username, password, and full name are required."
+        return False, "Le nom d'utilisateur, le mot de passe et le nom complet sont obligatoires."
     
     if password != confirm_password:
-        return False, "Passwords do not match."
+        return False, "Les mots de passe ne correspondent pas."
     
     if len(password) < 6:
-        return False, "Password must be at least 6 characters long."
+        return False, "Le mot de passe doit contenir au moins 6 caractères."
     
     # Username validation
     if not re.match(r'^[a-zA-Z0-9_]+$', username):
-        return False, "Username can only contain letters, numbers, and underscores."
+        return False, "Le nom d'utilisateur ne peut contenir que des lettres, des chiffres et des tirets bas."
     
     # Email validation (if provided)
     if email and not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
-        return False, "Please enter a valid email address."
+        return False, "Veuillez entrer une adresse email valide."
     
     # Phone validation (if provided)
     if phone and not re.match(r'^\+?[0-9\s\-\(\)]+$', phone):
-        return False, "Please enter a valid phone number."
+        return False, "Veuillez entrer un numéro de téléphone valide."
     
     return True, ""
 
@@ -93,7 +93,7 @@ def register_user(username, password, full_name, email=None, phone=None):
     
     # Check if username already exists
     if db.get_user(username):
-        return False, "Username already exists"
+        return False, "Ce nom d'utilisateur existe déjà"
     
     # Hash password and create user
     hashed_password = hash_password(password)
@@ -107,16 +107,16 @@ def register_user(username, password, full_name, email=None, phone=None):
     )
     
     if user_id:
-        return True, "Registration successful! Please wait for admin validation before logging in."
+        return True, "Inscription réussie ! Veuillez attendre la validation de votre compte par un administrateur."
     else:
-        return False, "Registration failed. Please try again."
+        return False, "L'inscription a échoué. Veuillez réessayer."
 
 def logout_user():
     """Log out the current user."""
     if st.session_state.logged_in:
         user_id = st.session_state.user_id
         db = Database()
-        db.log_activity(user_id, "Logged out")
+        db.log_activity(user_id, "Déconnexion")
     
     st.session_state.logged_in = False
     st.session_state.user_id = None
@@ -124,7 +124,7 @@ def logout_user():
     st.session_state.role = None
     st.session_state.full_name = None
     st.session_state.validated = False
-    st.session_state.login_message = "You have been logged out"
+    st.session_state.login_message = "Vous avez été déconnecté"
     st.session_state.login_success = False
     st.session_state.current_page = None
 
@@ -133,7 +133,7 @@ def require_login(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         if not st.session_state.logged_in:
-            st.error("Please log in to access this feature")
+            st.error("Veuillez vous connecter pour accéder à cette fonctionnalité")
             return None
         return func(*args, **kwargs)
     return wrapper
@@ -143,10 +143,10 @@ def require_admin(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         if not st.session_state.logged_in:
-            st.error("Please log in to access this feature")
+            st.error("Veuillez vous connecter pour accéder à cette fonctionnalité")
             return None
         if st.session_state.role != "admin":
-            st.error("Admin privileges required")
+            st.error("Privilèges d'administrateur requis")
             return None
         return func(*args, **kwargs)
     return wrapper
@@ -156,17 +156,17 @@ def require_validation(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         if not st.session_state.logged_in:
-            st.error("Please log in to access this feature")
+            st.error("Veuillez vous connecter pour accéder à cette fonctionnalité")
             return None
         if not st.session_state.validated:
-            st.warning("Your account is awaiting validation by an administrator")
+            st.warning("Votre compte est en attente de validation par un administrateur")
             return None
         return func(*args, **kwargs)
     return wrapper
 
 def login_page():
     """Render the login page."""
-    st.title("Zouhair E-Learning Platform")
+    st.title("Plateforme E-Learning Zouhair")
     
     # Custom CSS for styling
     st.markdown("""
@@ -184,13 +184,13 @@ def login_page():
     </style>
     """, unsafe_allow_html=True)
     
-    tab1, tab2 = st.tabs(["Login", "Register"])
+    tab1, tab2 = st.tabs(["Connexion", "Inscription"])
     
     with tab1:
         with st.form("login_form"):
-            username = st.text_input("Username")
-            password = st.text_input("Password", type="password")
-            submit = st.form_submit_button("Login")
+            username = st.text_input("Nom d'utilisateur")
+            password = st.text_input("Mot de passe", type="password")
+            submit = st.form_submit_button("Se connecter")
             
             if submit:
                 login_user(username, password)
@@ -202,24 +202,24 @@ def login_page():
     
     with tab2:
         with st.form("register_form"):
-            st.subheader("Create Student Account")
+            st.subheader("Créer un compte étudiant")
             
-            new_username = st.text_input("Choose Username")
-            new_password = st.text_input("Choose Password", type="password")
-            confirm_password = st.text_input("Confirm Password", type="password")
+            new_username = st.text_input("Choisir un nom d'utilisateur")
+            new_password = st.text_input("Choisir un mot de passe", type="password")
+            confirm_password = st.text_input("Confirmer le mot de passe", type="password")
             
-            full_name = st.text_input("Full Name")
-            email = st.text_input("Email (optional)")
-            phone = st.text_input("Phone Number (optional)")
+            full_name = st.text_input("Nom complet")
+            email = st.text_input("Email (optionnel)")
+            phone = st.text_input("Numéro de téléphone (optionnel)")
             
             # Registration terms agreement
-            agree = st.checkbox("I agree to the terms and conditions")
+            agree = st.checkbox("J'accepte les conditions d'utilisation")
             
-            register = st.form_submit_button("Register")
+            register = st.form_submit_button("S'inscrire")
             
             if register:
                 if not agree:
-                    st.error("You must agree to the terms and conditions to register")
+                    st.error("Vous devez accepter les conditions d'utilisation pour vous inscrire")
                 else:
                     is_valid, message = validate_registration_form(
                         new_username, new_password, confirm_password, full_name, email, phone
@@ -232,6 +232,6 @@ def login_page():
                             new_username, new_password, full_name, email, phone
                         )
                         if success:
-                            st.success(message)
+                            st.success("Inscription réussie ! Veuillez attendre la validation de votre compte par un administrateur.")
                         else:
-                            st.error(message)
+                            st.error(f"Échec de l'inscription : {message}")

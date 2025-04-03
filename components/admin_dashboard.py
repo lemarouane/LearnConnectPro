@@ -71,43 +71,43 @@ def admin_dashboard():
     </style>
     """, unsafe_allow_html=True)
     
-    st.markdown('<h1 class="admin-header">Admin Dashboard</h1>', unsafe_allow_html=True)
-    st.markdown(f'<p class="admin-welcome">Welcome, Admin {st.session_state.full_name or st.session_state.username}!</p>', unsafe_allow_html=True)
+    st.markdown('<h1 class="admin-header">Tableau de Bord Administrateur</h1>', unsafe_allow_html=True)
+    st.markdown(f'<p class="admin-welcome">Bienvenue, Admin {st.session_state.full_name or st.session_state.username}!</p>', unsafe_allow_html=True)
     
     # Sidebar navigation with styling
-    st.sidebar.markdown('<h2 style="color: #1565C0;">Admin Panel</h2>', unsafe_allow_html=True)
+    st.sidebar.markdown('<h2 style="color: #1565C0;">Panneau Admin</h2>', unsafe_allow_html=True)
     
     # Get admin profile image or use default
     admin_image = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
     st.sidebar.image(admin_image, width=100)
-    st.sidebar.markdown(f"<div style='text-align: center; margin-bottom: 20px;'><b>{st.session_state.full_name or st.session_state.username}</b><br>Administrator</div>", unsafe_allow_html=True)
+    st.sidebar.markdown(f"<div style='text-align: center; margin-bottom: 20px;'><b>{st.session_state.full_name or st.session_state.username}</b><br>Administrateur</div>", unsafe_allow_html=True)
     
     st.sidebar.markdown("<hr>", unsafe_allow_html=True)
     
     admin_page = st.sidebar.radio(
         "Navigation",
-        ["Dashboard Overview", "Content Management", "User Management", "Level Management", "Subject Management", "Activity Logs"]
+        ["Aperçu du Tableau de Bord", "Gestion du Contenu", "Gestion des Utilisateurs", "Gestion des Niveaux", "Gestion des Matières", "Journaux d'Activité"]
     )
     
     st.sidebar.markdown("<hr>", unsafe_allow_html=True)
-    st.sidebar.markdown("<small>Zouhair E-Learning Platform<br>© 2025 All Rights Reserved</small>", unsafe_allow_html=True)
+    st.sidebar.markdown("<small>Plateforme E-Learning Zouhair<br>© 2025 Tous Droits Réservés</small>", unsafe_allow_html=True)
     
-    if admin_page == "Dashboard Overview":
+    if admin_page == "Aperçu du Tableau de Bord":
         dashboard_overview()
-    elif admin_page == "Content Management":
+    elif admin_page == "Gestion du Contenu":
         content_management()
-    elif admin_page == "User Management":
+    elif admin_page == "Gestion des Utilisateurs":
         user_management()
-    elif admin_page == "Level Management":
+    elif admin_page == "Gestion des Niveaux":
         level_management()
-    elif admin_page == "Subject Management":
+    elif admin_page == "Gestion des Matières":
         subject_management()
-    elif admin_page == "Activity Logs":
+    elif admin_page == "Journaux d'Activité":
         activity_logs()
         
 def dashboard_overview():
     """Dashboard overview with statistics and charts."""
-    st.header("Platform Overview")
+    st.header("Aperçu de la Plateforme")
     
     db = Database()
     
@@ -131,43 +131,43 @@ def dashboard_overview():
     with col1:
         st.markdown("""
         <div class="stat-card">
-            <div class="stat-label">Total Students</div>
+            <div class="stat-label">Total Étudiants</div>
             <div class="stat-value">{}</div>
-            <div>({} validated)</div>
+            <div>({} validés)</div>
         </div>
         """.format(total_students, validated_students), unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
         <div class="stat-card">
-            <div class="stat-label">Total Courses</div>
+            <div class="stat-label">Total Cours</div>
             <div class="stat-value">{}</div>
-            <div>Educational Resources</div>
+            <div>Ressources Éducatives</div>
         </div>
         """.format(total_courses), unsafe_allow_html=True)
     
     with col3:
         st.markdown("""
         <div class="stat-card">
-            <div class="stat-label">Levels</div>
+            <div class="stat-label">Niveaux</div>
             <div class="stat-value">{}</div>
-            <div>Educational Levels</div>
+            <div>Niveaux Éducatifs</div>
         </div>
         """.format(total_levels), unsafe_allow_html=True)
         
     with col4:
         st.markdown("""
         <div class="stat-card">
-            <div class="stat-label">Subjects</div>
+            <div class="stat-label">Matières</div>
             <div class="stat-value">{}</div>
-            <div>Subject Areas</div>
+            <div>Domaines de Matières</div>
         </div>
         """.format(total_subjects), unsafe_allow_html=True)
     
     st.markdown("<hr>", unsafe_allow_html=True)
     
     # Content distribution by difficulty
-    st.subheader("Content Distribution")
+    st.subheader("Distribution du Contenu")
     
     col1, col2 = st.columns(2)
     
@@ -188,13 +188,13 @@ def dashboard_overview():
             fig_difficulty = px.pie(
                 names=list(difficulty_counts.keys()),
                 values=list(difficulty_counts.values()),
-                title="Content by Difficulty Level",
+                title="Contenu par Niveau de Difficulté",
                 color_discrete_sequence=px.colors.sequential.Blues
             )
             fig_difficulty.update_traces(textposition='inside', textinfo='percent+label')
             st.plotly_chart(fig_difficulty, use_container_width=True)
         else:
-            st.info("No content data available for difficulty distribution chart.")
+            st.info("Aucune donnée disponible pour le graphique de distribution par difficulté.")
     
     with col2:
         # Create data for content by type
@@ -210,17 +210,17 @@ def dashboard_overview():
             fig_type = px.bar(
                 x=list(content_type_counts.keys()),
                 y=list(content_type_counts.values()),
-                title="Content by Type",
-                labels={'x': 'Content Type', 'y': 'Count'},
+                title="Contenu par Type",
+                labels={'x': 'Type de Contenu', 'y': 'Nombre'},
                 color=list(content_type_counts.values()),
                 color_continuous_scale='Blues'
             )
             st.plotly_chart(fig_type, use_container_width=True)
         else:
-            st.info("No content data available for type distribution chart.")
+            st.info("Aucune donnée disponible pour le graphique de distribution par type.")
     
     # User activity timeline
-    st.subheader("Recent Activity")
+    st.subheader("Activités Récentes")
     
     # Create DataTable for recent activities
     if recent_activities:
@@ -250,14 +250,14 @@ def dashboard_overview():
             hide_index=True
         )
     else:
-        st.info("No recent activities to display.")
+        st.info("Aucune activité récente à afficher.")
 
 def content_management():
     """Content management section of the admin dashboard."""
-    st.header("Content Management")
+    st.header("Gestion du Contenu")
     
     # Tabs for different content management functions
-    tab1, tab2 = st.tabs(["Add Content", "Manage Content"])
+    tab1, tab2 = st.tabs(["Ajouter du Contenu", "Gérer le Contenu"])
     
     with tab1:
         add_content_form()
@@ -271,7 +271,7 @@ def content_management():
 
 def add_content_form():
     """Form for adding new content."""
-    st.subheader("Add New Content")
+    st.subheader("Ajouter Nouveau Contenu")
     
     db = Database()
     content_manager = ContentManager()
@@ -393,7 +393,7 @@ def add_content_form():
 
 def view_content_table():
     """Display a table of existing content."""
-    st.subheader("Manage Existing Content")
+    st.subheader("Gérer le Contenu Existant")
     
     db = Database()
     content_manager = ContentManager()
@@ -721,7 +721,7 @@ def display_content_details(content_id):
 
 def user_management():
     """User management section of the admin dashboard."""
-    st.header("User Management")
+    st.header("Gestion des Utilisateurs")
     
     db = Database()
     
@@ -1234,7 +1234,7 @@ def user_management():
 
 def level_management():
     """Level management section of the admin dashboard."""
-    st.header("Level Management")
+    st.header("Gestion des Niveaux")
     
     db = Database()
     
@@ -1333,7 +1333,7 @@ def level_management():
 
 def subject_management():
     """Subject management section of the admin dashboard."""
-    st.header("Subject Management")
+    st.header("Gestion des Matières")
     
     db = Database()
     
@@ -1477,7 +1477,7 @@ def subject_management():
 
 def activity_logs():
     """Activity logs section of the admin dashboard."""
-    st.header("Activity Logs")
+    st.header("Journaux d'Activité")
     
     db = Database()
     
