@@ -6,9 +6,8 @@ from PIL import Image
 import io
 from encryption import FileEncryption
 from utils import protect_pdf_content, log_screenshot_attempt
-from translations import t  # Import translation function
 
-def pdf_viewer(encrypted_path, title=None):
+def pdf_viewer(encrypted_path, title="PDF Viewer"):
     """
     Display a PDF viewer for an encrypted PDF file.
     
@@ -16,11 +15,8 @@ def pdf_viewer(encrypted_path, title=None):
         encrypted_path: Path to the encrypted PDF file
         title: Title to display above the viewer
     """
-    if title is None:
-        title = t("pdf_viewer")
-        
     if not os.path.exists(encrypted_path):
-        st.error(t("pdf_not_found"))
+        st.error("PDF file not found.")
         return
     
     # Decrypt the PDF to memory
@@ -43,7 +39,7 @@ def pdf_viewer(encrypted_path, title=None):
         st.markdown(f"## {title}")
         
         # Monitor screenshot attempts
-        if st.button(t("take_screenshot")):
+        if st.button("Take Screenshot (3 max per 15 minutes)"):
             allowed, message = log_screenshot_attempt(
                 st.session_state.user_id, 
                 st.session_state.get('current_course_id')
@@ -60,10 +56,10 @@ def pdf_viewer(encrypted_path, title=None):
         images = []
         
         # Display as individual pages
-        st.markdown(f"### {t('pdf_viewer')}")
+        st.markdown("### PDF Document Viewer")
         
         # Create an expander for pages
-        with st.expander(t("view"), expanded=True):
+        with st.expander("View All Pages", expanded=True):
             for page_num in range(min(len(doc), 10)):  # Limit to first 10 pages for performance
                 page = doc.load_page(page_num)
                 
@@ -72,18 +68,18 @@ def pdf_viewer(encrypted_path, title=None):
                 img_data = pix.tobytes("png")
                 
                 # Display the page image
-                st.markdown(f"**{t('page')} {page_num + 1}**")
-                st.image(img_data, caption=f"{t('page')} {page_num + 1}", use_container_width=True)
+                st.markdown(f"**Page {page_num + 1}**")
+                st.image(img_data, caption=f"Page {page_num + 1}", use_column_width=True)
                 st.markdown("---")
                 
             if len(doc) > 10:
-                st.info(t("pdf_page_limit").format(total_pages=len(doc)))
+                st.info(f"Showing first 10 pages of {len(doc)} total pages for performance reasons.")
         
         # Close the document
         doc.close()
         
         # Additional protections warning
-        st.info(t("pdf_protection"))
+        st.info("Note: This document is protected. Screenshots are limited to 3 per 15 minutes and are monitored.")
         
     except Exception as e:
         st.error(f"Error displaying PDF: {str(e)}")
@@ -97,7 +93,7 @@ def pdf_preview(encrypted_path, max_height=300):
         max_height: Maximum height for the preview iframe
     """
     if not os.path.exists(encrypted_path):
-        st.error(t("pdf_not_found"))
+        st.error("PDF file not found.")
         return
     
     try:
@@ -126,7 +122,7 @@ def pdf_preview(encrypted_path, max_height=300):
             img_data = pix.tobytes("png")
             
             # Display the first page as preview
-            st.image(img_data, caption=t("pdf_preview"), width=300)
+            st.image(img_data, caption="PDF Preview (Click to view full document)", width=300)
         
         # Close the document
         doc.close()

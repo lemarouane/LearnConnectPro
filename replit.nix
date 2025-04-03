@@ -1,6 +1,5 @@
 {pkgs}: {
   deps = [
-    pkgs.sqlite
     pkgs.xcbuild
     pkgs.swig
     pkgs.mupdf
