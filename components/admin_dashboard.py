@@ -1048,19 +1048,26 @@ def user_management():
                                 )
 
                                 col1, col2 = st.columns([1, 1])
-                                    with col1:
-                                        if st.button("Confirm Validation", key=f"confirm_{student['id']}", type="primary"):
-                                            # Validate user
-                                            if db.validate_user(student['id'], validate=True):
-                                    with col2:
-                                        if st.button("Cancel", key=f"cancel_{student['id']}"):
-                                            # Reset validation state
-                                            st.session_state[f"validating_{student['id']}"] = False
-                                            st.session_state[f"selected_level_{student['id']}"] = None
-                                            st.session_state[f"selected_subjects_{student['id']}"] = []
-                                            st.session_state[f"selected_courses_{student['id']}"] = {}
-                                            st.session_state[f"selected_difficulty_{student['id']}"] = None
+                                with col1:
+                                    if st.button("Confirm Validation", key=f"confirm_{student['id']}", type="primary"):
+                                        # Validate user
+                                        if db.validate_user(student['id'], validate=True):
+                                            # Log activity
+                                            db.log_activity(
+                                                st.session_state.user_id,
+                                                f"Validated and assigned student {student['username']}"
+                                            )
+                                            st.success(f"User {student['username']} validated successfully.")
                                             st.rerun()
+                                with col2:
+                                    if st.button("Cancel", key=f"cancel_{student['id']}"):
+                                        # Reset validation state
+                                        st.session_state[f"validating_{student['id']}"] = False
+                                        st.session_state[f"selected_level_{student['id']}"] = None
+                                        st.session_state[f"selected_subjects_{student['id']}"] = []
+                                        st.session_state[f"selected_courses_{student['id']}"] = {}
+                                        st.session_state[f"selected_difficulty_{student['id']}"] = None
+                                        st.rerun()
                                         # Assign level
                                         db.assign_level_to_user(student['id'], selected_level_id)
 
