@@ -21,13 +21,18 @@ def pdf_viewer(encrypted_path, title="PDF Viewer"):
         encryption = FileEncryption()
         pdf_data = encryption.decrypt_file(encrypted_path)
         
-        # Convert to base64 string for display
-        b64_pdf = base64.b64encode(pdf_data).decode('utf-8')
+        # Save to a temporary file that will be displayed using an object tag
+        temp_dir = "uploads/temp"
+        os.makedirs(temp_dir, exist_ok=True)
+        temp_file_path = os.path.join(temp_dir, f"temp_{st.session_state.user_id}_{os.path.basename(encrypted_path)}")
+        
+        with open(temp_file_path, 'wb') as f:
+            f.write(pdf_data)
         
         # Set up the PDF viewer with protections
         protect_pdf_content()
         
-        # Display PDF using an iframe with protections
+        # Display PDF using an object tag instead of iframe
         st.markdown(f"## {title}")
         
         # Monitor screenshot attempts
@@ -41,9 +46,26 @@ def pdf_viewer(encrypted_path, title="PDF Viewer"):
             else:
                 st.error(message)
         
-        # Create a unique PDF display name to prevent browser caching
-        pdf_display = f'<iframe src="data:application/pdf;base64,{b64_pdf}" width="100%" height="600" type="application/pdf"></iframe>'
-        st.markdown(pdf_display, unsafe_allow_html=True)
+        # Use streamlit's PDF display functionality
+        with open(temp_file_path, "rb") as file:
+            st.download_button(
+                label="Download PDF",
+                data=file,
+                file_name=os.path.basename(encrypted_path),
+                mime="application/pdf"
+            )
+        
+        # Display using streamlit components
+        st.components.v1.html(
+            f"""
+            <div style="width:100%; height:600px; overflow:hidden; border:1px solid #ccc; border-radius:5px;">
+                <object data="/app/uploads/temp/{os.path.basename(temp_file_path)}" type="application/pdf" width="100%" height="600">
+                    <p>It appears your browser doesn't support PDFs. You can download the PDF file instead.</p>
+                </object>
+            </div>
+            """,
+            height=620,
+        )
         
         # Additional protections warning
         st.info("Note: This document is protected. Screenshots are limited to 3 per 15 minutes and are monitored.")
@@ -67,11 +89,25 @@ def pdf_preview(encrypted_path, max_height=300):
         encryption = FileEncryption()
         pdf_data = encryption.decrypt_file(encrypted_path)
         
-        b64_pdf = base64.b64encode(pdf_data).decode('utf-8')
+        # Save to a temporary file for preview
+        temp_dir = "uploads/temp"
+        os.makedirs(temp_dir, exist_ok=True)
+        temp_file_path = os.path.join(temp_dir, f"preview_{st.session_state.user_id}_{os.path.basename(encrypted_path)}")
         
-        # Display a smaller preview
-        pdf_preview = f'<iframe src="data:application/pdf;base64,{b64_pdf}" width="100%" height="{max_height}" type="application/pdf"></iframe>'
-        st.markdown(pdf_preview, unsafe_allow_html=True)
+        with open(temp_file_path, 'wb') as f:
+            f.write(pdf_data)
+        
+        # Display using streamlit components for preview
+        st.components.v1.html(
+            f"""
+            <div style="width:100%; height:{max_height}px; overflow:hidden; border:1px solid #ddd; border-radius:4px;">
+                <object data="/app/uploads/temp/{os.path.basename(temp_file_path)}" type="application/pdf" width="100%" height="{max_height}">
+                    <p>PDF Preview (Click to view full document)</p>
+                </object>
+            </div>
+            """,
+            height=max_height+20,
+        )
         
     except Exception as e:
         st.error(f"Error displaying PDF preview: {str(e)}")

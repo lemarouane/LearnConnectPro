@@ -2,25 +2,99 @@ import streamlit as st
 from database import Database
 from content_manager import ContentManager
 import json
-from utils import validate_file, save_uploaded_file, delete_file, format_size
+import pandas as pd
+import numpy as np
+import plotly.express as px
+import plotly.graph_objects as go
+from utils import validate_file, save_uploaded_file, delete_file, format_size, apply_custom_css
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from components.pdf_viewer import pdf_preview
 from components.video_player import video_thumbnail
 
 def admin_dashboard():
     """Admin dashboard for managing content and users."""
-    st.title("Admin Dashboard")
-    st.write(f"Welcome, Admin {st.session_state.full_name or st.session_state.username}!")
+    # Apply custom styling for admin dashboard
+    st.markdown("""
+    <style>
+    .admin-header {
+        color: #1565C0;
+        padding: 1rem 0;
+        border-bottom: 2px solid #1565C0;
+        margin-bottom: 1.5rem;
+    }
+    .stat-card {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #1565C0;
+        margin: 0.5rem 0;
+    }
+    .stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .admin-sidebar {
+        padding: 1rem;
+        border-radius: 5px;
+    }
+    .admin-sidebar .css-1d391kg {
+        background-color: #f0f2f6;
+    }
+    .menu-item {
+        margin-bottom: 0.5rem;
+        padding: 0.75rem;
+        border-radius: 5px;
+        transition: background-color 0.2s;
+    }
+    .menu-item:hover {
+        background-color: #e9ecef;
+    }
+    .admin-welcome {
+        font-size: 1.2rem;
+        color: #495057;
+        margin-bottom: 2rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
-    # Sidebar navigation
-    st.sidebar.title("Admin Panel")
+    st.markdown('<h1 class="admin-header">Admin Dashboard</h1>', unsafe_allow_html=True)
+    st.markdown(f'<p class="admin-welcome">Welcome, Admin {st.session_state.full_name or st.session_state.username}!</p>', unsafe_allow_html=True)
+    
+    # Sidebar navigation with styling
+    st.sidebar.markdown('<h2 style="color: #1565C0;">Admin Panel</h2>', unsafe_allow_html=True)
+    
+    # Get admin profile image or use default
+    admin_image = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
+    st.sidebar.image(admin_image, width=100)
+    st.sidebar.markdown(f"<div style='text-align: center; margin-bottom: 20px;'><b>{st.session_state.full_name or st.session_state.username}</b><br>Administrator</div>", unsafe_allow_html=True)
+    
+    st.sidebar.markdown("<hr>", unsafe_allow_html=True)
+    
     admin_page = st.sidebar.radio(
-        "Manage",
-        ["Content Management", "User Management", "Level Management", "Subject Management", "Activity Logs"]
+        "Navigation",
+        ["Dashboard Overview", "Content Management", "User Management", "Level Management", "Subject Management", "Activity Logs"]
     )
     
-    if admin_page == "Content Management":
+    st.sidebar.markdown("<hr>", unsafe_allow_html=True)
+    st.sidebar.markdown("<small>Zouhair E-Learning Platform<br>© 2025 All Rights Reserved</small>", unsafe_allow_html=True)
+    
+    if admin_page == "Dashboard Overview":
+        dashboard_overview()
+    elif admin_page == "Content Management":
         content_management()
     elif admin_page == "User Management":
         user_management()
@@ -30,6 +104,153 @@ def admin_dashboard():
         subject_management()
     elif admin_page == "Activity Logs":
         activity_logs()
+        
+def dashboard_overview():
+    """Dashboard overview with statistics and charts."""
+    st.header("Platform Overview")
+    
+    db = Database()
+    
+    # Get statistics
+    total_students = len(db.get_all_users(role="student"))
+    validated_students = len(db.get_all_users(role="student", validated=1))
+    total_courses = len(db.get_all_courses())
+    
+    # Get levels and subjects statistics
+    levels = db.get_all_levels()
+    total_levels = len(levels)
+    subjects = db.get_all_subjects()
+    total_subjects = len(subjects)
+    
+    # Recent activity
+    recent_activities = db.get_activity_logs(limit=5)
+    
+    # Display statistics in cards
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.markdown("""
+        <div class="stat-card">
+            <div class="stat-label">Total Students</div>
+            <div class="stat-value">{}</div>
+            <div>({} validated)</div>
+        </div>
+        """.format(total_students, validated_students), unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="stat-card">
+            <div class="stat-label">Total Courses</div>
+            <div class="stat-value">{}</div>
+            <div>Educational Resources</div>
+        </div>
+        """.format(total_courses), unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div class="stat-card">
+            <div class="stat-label">Levels</div>
+            <div class="stat-value">{}</div>
+            <div>Educational Levels</div>
+        </div>
+        """.format(total_levels), unsafe_allow_html=True)
+        
+    with col4:
+        st.markdown("""
+        <div class="stat-card">
+            <div class="stat-label">Subjects</div>
+            <div class="stat-value">{}</div>
+            <div>Subject Areas</div>
+        </div>
+        """.format(total_subjects), unsafe_allow_html=True)
+    
+    st.markdown("<hr>", unsafe_allow_html=True)
+    
+    # Content distribution by difficulty
+    st.subheader("Content Distribution")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Create data for content by difficulty
+        all_courses = db.get_all_courses()
+        difficulty_counts = {}
+        
+        for course in all_courses:
+            difficulty = course['difficulty']
+            if difficulty in difficulty_counts:
+                difficulty_counts[difficulty] += 1
+            else:
+                difficulty_counts[difficulty] = 1
+        
+        if difficulty_counts:
+            # Create a pie chart
+            fig_difficulty = px.pie(
+                names=list(difficulty_counts.keys()),
+                values=list(difficulty_counts.values()),
+                title="Content by Difficulty Level",
+                color_discrete_sequence=px.colors.sequential.Blues
+            )
+            fig_difficulty.update_traces(textposition='inside', textinfo='percent+label')
+            st.plotly_chart(fig_difficulty, use_container_width=True)
+        else:
+            st.info("No content data available for difficulty distribution chart.")
+    
+    with col2:
+        # Create data for content by type
+        content_type_counts = {"PDF": 0, "YouTube": 0}
+        
+        for course in all_courses:
+            content_type = course['content_type']
+            if content_type in content_type_counts:
+                content_type_counts[content_type] += 1
+        
+        if all_courses:
+            # Create a bar chart
+            fig_type = px.bar(
+                x=list(content_type_counts.keys()),
+                y=list(content_type_counts.values()),
+                title="Content by Type",
+                labels={'x': 'Content Type', 'y': 'Count'},
+                color=list(content_type_counts.values()),
+                color_continuous_scale='Blues'
+            )
+            st.plotly_chart(fig_type, use_container_width=True)
+        else:
+            st.info("No content data available for type distribution chart.")
+    
+    # User activity timeline
+    st.subheader("Recent Activity")
+    
+    # Create DataTable for recent activities
+    if recent_activities:
+        activity_df = pd.DataFrame(recent_activities)
+        
+        # Format timestamp for better readability
+        activity_df['formatted_time'] = pd.to_datetime(activity_df['timestamp']).dt.strftime('%Y-%m-%d %H:%M')
+        
+        # Get usernames for user_ids
+        usernames = {}
+        for activity in recent_activities:
+            if activity['user_id'] not in usernames:
+                user = db.get_user_by_id(activity['user_id'])
+                if user:
+                    usernames[activity['user_id']] = user['username']
+                else:
+                    usernames[activity['user_id']] = f"User {activity['user_id']}"
+        
+        activity_df['username'] = activity_df['user_id'].map(usernames)
+        
+        # Display as a styled table
+        st.dataframe(
+            activity_df[['username', 'action', 'formatted_time']].rename(
+                columns={'username': 'User', 'action': 'Action', 'formatted_time': 'Timestamp'}
+            ),
+            use_container_width=True,
+            hide_index=True
+        )
+    else:
+        st.info("No recent activities to display.")
 
 def content_management():
     """Content management section of the admin dashboard."""
@@ -504,6 +725,88 @@ def user_management():
     
     db = Database()
     
+    # Custom styling for user management
+    st.markdown("""
+    <style>
+    .user-card {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease;
+    }
+    .user-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .user-card h3 {
+        color: #1565C0;
+        margin-top: 0;
+        margin-bottom: 10px;
+    }
+    .validated-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+    .validated-true {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .validated-false {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    .action-button {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+    .user-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .user-table th {
+        background-color: #f0f2f6;
+        padding: 8px 12px;
+        text-align: left;
+        border-bottom: 2px solid #dee2e6;
+    }
+    .user-table td {
+        padding: 8px 12px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .user-table tr:hover {
+        background-color: #f8f9fa;
+    }
+    .data-table {
+        font-family: Arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .data-table th {
+        background-color: #1565C0;
+        color: white;
+        padding: 12px;
+        text-align: left;
+    }
+    .data-table td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+    .data-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    .data-table tr:hover {
+        background-color: #f1f1f1;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     # Tabs for different user management functions
     tab1, tab2 = st.tabs(["Pending Validations", "All Users"])
     
@@ -518,47 +821,71 @@ def user_management():
         else:
             st.write(f"{len(pending_students)} students waiting for validation")
             
+            # Create a DataFrame for better table display
+            if pending_students:
+                pending_df = pd.DataFrame(pending_students)
+                pending_df['full_name'] = pending_df['full_name'].fillna(pending_df['username'])
+                pending_df['email'] = pending_df['email'].fillna('Not provided')
+                pending_df['phone'] = pending_df['phone'].fillna('Not provided')
+                
+                # Display in a table
+                st.dataframe(
+                    pending_df[['username', 'full_name', 'email', 'phone', 'created_at']].rename(
+                        columns={
+                            'username': 'Username',
+                            'full_name': 'Full Name',
+                            'email': 'Email',
+                            'phone': 'Phone',
+                            'created_at': 'Registered On'
+                        }
+                    ),
+                    use_container_width=True,
+                    hide_index=True
+                )
+            
+            # Action cards for each pending student
             for student in pending_students:
-                # Create a card-like display for each student
-                st.markdown(f"""
-                <div class="user-card">
-                    <h3>{student['full_name'] or student['username']}</h3>
-                    <p><strong>Username:</strong> {student['username']}</p>
-                    <p><strong>Email:</strong> {student['email'] or 'Not provided'}</p>
-                    <p><strong>Phone:</strong> {student['phone'] or 'Not provided'}</p>
-                    <p><strong>Registered:</strong> {student['created_at']}</p>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    if st.button("Validate", key=f"validate_{student['id']}"):
-                        if db.validate_user(student['id'], validate=True):
-                            # Log activity
-                            db.log_activity(
-                                st.session_state.user_id,
-                                f"Validated student account: {student['username']}"
-                            )
-                            st.success(f"User {student['username']} validated successfully.")
-                            st.rerun()
-                        else:
-                            st.error("Failed to validate user.")
-                
-                with col2:
-                    if st.button("Delete", key=f"delete_pending_{student['id']}"):
-                        if db.delete_user(student['id']):
-                            # Log activity
-                            db.log_activity(
-                                st.session_state.user_id,
-                                f"Deleted pending student account: {student['username']}"
-                            )
-                            st.success(f"User {student['username']} deleted successfully.")
-                            st.rerun()
-                        else:
-                            st.error("Failed to delete user.")
-                
-                st.markdown("---")
+                with st.container():
+                    col1, col2 = st.columns([3, 1])
+                    
+                    with col1:
+                        st.markdown(f"""
+                        <div class="user-card">
+                            <h3>{student['full_name'] or student['username']}</h3>
+                            <p><strong>Username:</strong> {student['username']}</p>
+                            <p><strong>Email:</strong> {student['email'] or 'Not provided'}</p>
+                            <p><strong>Phone:</strong> {student['phone'] or 'Not provided'}</p>
+                            <p><strong>Registered:</strong> {student['created_at']}</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    
+                    with col2:
+                        st.markdown("<br><br>", unsafe_allow_html=True)
+                        if st.button("✅ Validate", key=f"validate_{student['id']}"):
+                            if db.validate_user(student['id'], validate=True):
+                                # Log activity
+                                db.log_activity(
+                                    st.session_state.user_id,
+                                    f"Validated student account: {student['username']}"
+                                )
+                                st.success(f"User {student['username']} validated successfully.")
+                                st.rerun()
+                            else:
+                                st.error("Failed to validate user.")
+                        
+                        if st.button("🗑️ Delete", key=f"delete_pending_{student['id']}"):
+                            if db.delete_user(student['id']):
+                                # Log activity
+                                db.log_activity(
+                                    st.session_state.user_id,
+                                    f"Deleted pending student account: {student['username']}"
+                                )
+                                st.success(f"User {student['username']} deleted successfully.")
+                                st.rerun()
+                            else:
+                                st.error("Failed to delete user.")
+                    
+                    st.markdown("<hr>", unsafe_allow_html=True)
     
     with tab2:
         st.subheader("All Users")
@@ -592,6 +919,39 @@ def user_management():
             st.info("No users found with the selected filters.")
         else:
             st.write(f"Showing {len(users)} users")
+            
+            # Create a DataFrame for all users
+            users_df = pd.DataFrame(users)
+            users_df['full_name'] = users_df['full_name'].fillna(users_df['username'])
+            users_df['email'] = users_df['email'].fillna('Not provided')
+            users_df['phone'] = users_df['phone'].fillna('Not provided')
+            users_df['role'] = users_df['role'].apply(lambda x: x.title())
+            users_df['validated'] = users_df['validated'].apply(
+                lambda x: "✅ Validated" if x else "❌ Not Validated"
+            )
+            
+            # Display in a table
+            st.dataframe(
+                users_df[['username', 'full_name', 'role', 'validated', 'email', 'phone', 'created_at']].rename(
+                    columns={
+                        'username': 'Username', 
+                        'full_name': 'Full Name',
+                        'role': 'Role',
+                        'validated': 'Status',
+                        'email': 'Email',
+                        'phone': 'Phone',
+                        'created_at': 'Registered On'
+                    }
+                ),
+                use_container_width=True,
+                hide_index=True
+            )
+            
+            st.markdown("""
+            <div style="padding: 10px 15px; background-color: #f0f7ff; border-left: 4px solid #1565C0; margin: 20px 0; border-radius: 4px;">
+                <strong>User Management:</strong> Select a user card below to manage individual users.
+            </div>
+            """, unsafe_allow_html=True)
             
             for user in users:
                 # Create a card for each user
