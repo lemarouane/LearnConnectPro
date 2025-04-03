@@ -1,41 +1,25 @@
 import os
-import base64
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+import base64
 
 class FileEncryption:
     def __init__(self, key_file="secure_key.key"):
         """Initialize with a key file or generate a new key."""
         self.key_file = key_file
         self.key = self._get_or_create_key()
-        self.cipher = Fernet(self.key)
+        self.fernet = Fernet(self.key)
     
     def _get_or_create_key(self):
         """Get existing key or create a new one."""
         if os.path.exists(self.key_file):
-            with open(self.key_file, "rb") as f:
-                key = f.read()
+            with open(self.key_file, "rb") as file:
+                key = file.read()
         else:
-            # Generate a key from password and salt
-            password = os.getenv("ENCRYPTION_PASSWORD", "secure_elearning_platform").encode()
-            salt = os.getenv("ENCRYPTION_SALT", "secure_salt_value").encode()
-            
-            kdf = PBKDF2HMAC(
-                algorithm=hashes.SHA256(),
-                length=32,
-                salt=salt,
-                iterations=100000,
-            )
-            key = base64.urlsafe_b64encode(kdf.derive(password))
-            
-            # Save key to file with secure permissions
-            with open(self.key_file, "wb") as f:
-                f.write(key)
-            
-            # Set permissions to readable only by owner
-            os.chmod(self.key_file, 0o600)
-        
+            key = Fernet.generate_key()
+            with open(self.key_file, "wb") as file:
+                file.write(key)
         return key
     
     def encrypt_file(self, input_path, output_dir):
@@ -43,34 +27,25 @@ class FileEncryption:
         Encrypt a file and save it to output directory.
         Returns the path to the encrypted file.
         """
-        # Create output directory if it doesn't exist
+        # Ensure output directory exists
         os.makedirs(output_dir, exist_ok=True)
         
-        # Generate a secure filename
-        original_filename = os.path.basename(input_path)
+        # Get base filename
+        base_name = os.path.basename(input_path)
+        encrypted_path = os.path.join(output_dir, f"{base_name}.enc")
         
-        # Create a hash object, update it, and then finalize it
-        hash_obj = hashes.Hash(hashes.SHA256())
-        hash_obj.update(original_filename.encode())
-        digest = hash_obj.finalize()
+        # Read file data
+        with open(input_path, "rb") as file:
+            data = file.read()
         
-        file_hash = base64.urlsafe_b64encode(digest).decode()[:10]
+        # Encrypt data
+        encrypted_data = self.fernet.encrypt(data)
         
-        encrypted_filename = f"{file_hash}_{original_filename}.enc"
-        output_path = os.path.join(output_dir, encrypted_filename)
+        # Save encrypted data
+        with open(encrypted_path, "wb") as file:
+            file.write(encrypted_data)
         
-        # Encrypt the file
-        with open(input_path, "rb") as f_in:
-            data = f_in.read()
-            encrypted_data = self.cipher.encrypt(data)
-            
-            with open(output_path, "wb") as f_out:
-                f_out.write(encrypted_data)
-        
-        # Set secure permissions for encrypted file
-        os.chmod(output_path, 0o600)
-        
-        return output_path
+        return encrypted_path
     
     def decrypt_file(self, encrypted_path, output_path=None):
         """
@@ -78,13 +53,21 @@ class FileEncryption:
         If output_path is provided, save to that path.
         Otherwise, return the decrypted data.
         """
-        with open(encrypted_path, "rb") as f:
-            encrypted_data = f.read()
-            decrypted_data = self.cipher.decrypt(encrypted_data)
+        # Read encrypted data
+        with open(encrypted_path, "rb") as file:
+            encrypted_data = file.read()
+        
+        # Decrypt data
+        decrypted_data = self.fernet.decrypt(encrypted_data)
+        
+        if output_path:
+            # Create directory if needed
+            os.makedirs(os.path.dirname(output_path), exist_ok=True)
             
-            if output_path:
-                with open(output_path, "wb") as f_out:
-                    f_out.write(decrypted_data)
-                return output_path
-            else:
-                return decrypted_data
+            # Save decrypted data
+            with open(output_path, "wb") as file:
+                file.write(decrypted_data)
+            return output_path
+        else:
+            # Return the decrypted data
+            return decrypted_data

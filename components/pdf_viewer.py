@@ -1,8 +1,8 @@
 import streamlit as st
-import os
-import tempfile
 import base64
 from encryption import FileEncryption
+import os
+from utils import protect_pdf_content, log_screenshot_attempt
 
 def pdf_viewer(encrypted_path, title="PDF Viewer"):
     """
@@ -12,51 +12,44 @@ def pdf_viewer(encrypted_path, title="PDF Viewer"):
         encrypted_path: Path to the encrypted PDF file
         title: Title to display above the viewer
     """
-    st.write(f"### {title}")
+    if not os.path.exists(encrypted_path):
+        st.error("PDF file not found.")
+        return
     
+    # Decrypt the PDF to memory
     try:
-        # Decrypt the PDF
         encryption = FileEncryption()
-        decrypted_data = encryption.decrypt_file(encrypted_path)
+        pdf_data = encryption.decrypt_file(encrypted_path)
         
-        # Create a temporary file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
-            temp_file.write(decrypted_data)
-            temp_path = temp_file.name
+        # Convert to base64 string for display
+        b64_pdf = base64.b64encode(pdf_data).decode('utf-8')
         
-        try:
-            # Display the PDF using base64 encoding in an iframe
-            with open(temp_path, "rb") as f:
-                base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-            
-            # Create a container with scrolling
-            pdf_container = st.container()
-            
-            with pdf_container:
-                pdf_display = f"""
-                <div style="display: flex; justify-content: center; width: 100%;">
-                    <iframe src="data:application/pdf;base64,{base64_pdf}" 
-                    width="800" height="600" type="application/pdf" frameborder="0"></iframe>
-                </div>
-                """
-                st.markdown(pdf_display, unsafe_allow_html=True)
-                
-                # Provide a download button
-                st.download_button(
-                    label="Download PDF",
-                    data=decrypted_data,
-                    file_name=os.path.basename(encrypted_path).replace(".enc", ""),
-                    mime="application/pdf"
-                )
-        finally:
-            # Clean up the temporary file
-            os.unlink(temp_path)
-    
+        # Set up the PDF viewer with protections
+        protect_pdf_content()
+        
+        # Display PDF using an iframe with protections
+        st.markdown(f"## {title}")
+        
+        # Monitor screenshot attempts
+        if st.button("Take Screenshot (3 max per 15 minutes)"):
+            allowed, message = log_screenshot_attempt(
+                st.session_state.user_id, 
+                st.session_state.get('current_course_id')
+            )
+            if allowed:
+                st.success(message)
+            else:
+                st.error(message)
+        
+        # Create a unique PDF display name to prevent browser caching
+        pdf_display = f'<iframe src="data:application/pdf;base64,{b64_pdf}" width="100%" height="600" type="application/pdf"></iframe>'
+        st.markdown(pdf_display, unsafe_allow_html=True)
+        
+        # Additional protections warning
+        st.info("Note: This document is protected. Screenshots are limited to 3 per 15 minutes and are monitored.")
+        
     except Exception as e:
         st.error(f"Error displaying PDF: {str(e)}")
-        return False
-    
-    return True
 
 def pdf_preview(encrypted_path, max_height=300):
     """
@@ -66,34 +59,19 @@ def pdf_preview(encrypted_path, max_height=300):
         encrypted_path: Path to the encrypted PDF file
         max_height: Maximum height for the preview iframe
     """
-    try:
-        # Decrypt the PDF
-        encryption = FileEncryption()
-        decrypted_data = encryption.decrypt_file(encrypted_path)
-        
-        # Create a temporary file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
-            temp_file.write(decrypted_data)
-            temp_path = temp_file.name
-        
-        try:
-            # Display the PDF using base64 encoding in an iframe
-            with open(temp_path, "rb") as f:
-                base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-            
-            pdf_display = f"""
-            <div style="width: 100%; border: 1px solid #e0e0e0; border-radius: 5px; padding: 5px;">
-                <iframe src="data:application/pdf;base64,{base64_pdf}" 
-                width="100%" height="{max_height}" type="application/pdf" frameborder="0"></iframe>
-            </div>
-            """
-            st.markdown(pdf_display, unsafe_allow_html=True)
-        finally:
-            # Clean up the temporary file
-            os.unlink(temp_path)
+    if not os.path.exists(encrypted_path):
+        st.error("PDF file not found.")
+        return
     
+    try:
+        encryption = FileEncryption()
+        pdf_data = encryption.decrypt_file(encrypted_path)
+        
+        b64_pdf = base64.b64encode(pdf_data).decode('utf-8')
+        
+        # Display a smaller preview
+        pdf_preview = f'<iframe src="data:application/pdf;base64,{b64_pdf}" width="100%" height="{max_height}" type="application/pdf"></iframe>'
+        st.markdown(pdf_preview, unsafe_allow_html=True)
+        
     except Exception as e:
         st.error(f"Error displaying PDF preview: {str(e)}")
-        return False
-    
-    return True

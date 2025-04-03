@@ -1,0 +1,123 @@
+Project Overview:
+"Zouhair E-learning" is an online educational platform where:
+
+Admins (Zouhair) manage courses, subjects (matières), levels (bac+2 or others), students, and content difficulty.
+
+Students register on the platform and are assigned courses based on their validation by the admin.
+
+The platform offers features for restricting content sharing and controls over how content is accessed and used.
+
+Key Features and Flow:
+1. Admin Capabilities:
+Login: Admins can log in securely to manage the platform.
+
+Manage Students:
+
+View and edit student information: Admins can update or delete student profiles.
+
+Validate students: After reviewing the student's registration form, Zouhair validates them and assigns them to specific courses.
+
+Assign students to a level (bac+2 or others): Zouhair will select the student's appropriate study level (e.g., Bac+2 or Bac+3) based on their profile.
+
+Assign students to a specific matiere (subject): Based on the level, Zouhair will assign students to a relevant subject (e.g., Maths, Physics, Informatics).
+
+Assign courses to students: Students can be assigned all courses for the selected subject or specific courses based on their needs.
+
+Manage Courses:
+
+Admins can create new courses by selecting a subject (matière) and level (bac+2 or others) from the database.
+
+Course content: Admins can upload content in the form of PDFs or YouTube videos. For PDFs, they upload the file; for videos, they input the YouTube URL.
+
+Course difficulty level: Courses will be categorized by difficulty (easy, medium, hard). Zouhair assigns these levels to the course content, ensuring that students see courses suitable for their understanding.
+
+Course image: Admins upload a course image, which will be displayed alongside the course title on the platform's frontend.
+
+Admins can edit or delete courses and reassign them to appropriate subjects and levels.
+
+Manage Subjects and Levels:
+
+Admins assign courses to specific subjects and levels, categorizing them accordingly.
+
+Difficulty setting: Each course is tagged with a difficulty level (easy, medium, hard) that helps guide the students based on their capabilities.
+
+Content Protection:
+
+Admins ensure that no student can download, copy, or share course content (PDF or video).
+
+2. Student Capabilities:
+Registration: Students fill out a registration form with personal details like name, email, phone number, etc.
+
+Login: After registration, students log in to access their assigned courses.
+
+Assigned Courses and Subjects:
+
+Once validated by the admin, students will see the courses and subjects they’ve been assigned to.
+
+Students can access all courses for a particular subject or only the selected courses as per Zouhair’s instructions.
+
+Difficulty-based course access: Each student sees only the courses that match their level of understanding (easy, medium, hard). The system filters courses to show only those suitable for the student’s level.
+
+Content Restrictions:
+
+PDF Files: The platform will display the PDF file directly on the webpage. Students will only be able to view the content, not download or copy it.
+
+YouTube Videos: YouTube videos are embedded directly on the platform, and the direct YouTube URL is hidden to prevent unauthorized access.
+
+Screenshot Restrictions: Students are allowed only 3 screenshots per 15 minutes. Any attempts beyond this limit will be blocked, and the system will monitor and log all screenshot activity.
+
+Admin Flow (Course Creation, Assignment, and Difficulty):
+Login: Admin logs in to the platform.
+
+Adding a New Course:
+
+Admin selects the subject (matière) and level (bac+2 or others) from a list (pre-populated from the database).
+
+Admin selects the content type (either PDF or YouTube video).
+
+If the content is a PDF, the admin uploads the file; if it’s a YouTube video, the admin enters the URL.
+
+Admin tags the course with a difficulty level (easy, medium, hard) based on the target student group.
+
+A course image is uploaded to display alongside the course title.
+
+Assigning the Course to a Student:
+
+After a student registers, Zouhair will review the student's registration details and validate them.
+
+Once validated, the admin assigns the student to a specific course, subject, and difficulty level.
+
+Student Flow (Course Access, Difficulty, and Content Restrictions):
+Student Registration: Students fill out their registration form.
+
+Login: After admin validation, students can log in to view their assigned courses.
+
+Access to Course Content:
+
+If the content is a PDF, the student can view it in a controlled viewer.
+
+If the content is a YouTube video, it will be embedded on the platform.
+
+Difficulty-Based Course Access:
+
+Students will see courses tailored to their level of understanding: easy, medium, or hard.
+
+This ensures that students receive courses appropriate to their proficiency level.
+
+Screenshot Restrictions:
+
+The system tracks student screenshots, limiting them to 3 per 15 minutes. Any attempt beyond this limit is blocked, ensuring no unauthorized content sharing.
+
+Security & Restrictions:
+Content Protection:
+
+Students can view content but cannot download, copy, or share it.
+
+For PDFs, the content is displayed in a view-only format, preventing downloads or copying.
+
+For YouTube videos, the direct YouTube URL is hidden, and the video is embedded securely.
+
+Screenshot Logs:
+
+The platform will monitor and log each screenshot taken by a student, ensuring the limit is not exceeded.
+
