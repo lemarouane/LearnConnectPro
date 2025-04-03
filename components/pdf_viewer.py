@@ -1,7 +1,10 @@
 import streamlit as st
 import base64
-from encryption import FileEncryption
 import os
+import fitz  # PyMuPDF
+from PIL import Image
+import io
+from encryption import FileEncryption
 from utils import protect_pdf_content, log_screenshot_attempt
 
 def pdf_viewer(encrypted_path, title="PDF Viewer"):
@@ -46,30 +49,34 @@ def pdf_viewer(encrypted_path, title="PDF Viewer"):
             else:
                 st.error(message)
         
-        # Use streamlit's PDF display functionality
-        with open(temp_file_path, "rb") as file:
-            st.download_button(
-                label="Download PDF",
-                data=file,
-                file_name=os.path.basename(encrypted_path),
-                mime="application/pdf"
-            )
+        # Convert the PDF to images for display
         
-        # Convert to base64 for inline display as a fallback method
-        with open(temp_file_path, "rb") as file:
-            base64_pdf = base64.b64encode(file.read()).decode('utf-8')
-            
-        # Use a more robust method with iframe and base64 data
-        pdf_display = f"""
-        <div style="width:100%; height:600px; overflow:hidden; border:1px solid #ccc; border-radius:5px;">
-            <iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="600" 
-                    style="border:none;" frameborder="0" allowfullscreen>
-            </iframe>
-        </div>
-        """
+        # Open the PDF with PyMuPDF
+        doc = fitz.open(temp_file_path)
+        images = []
         
-        # Display using streamlit components
-        st.components.v1.html(pdf_display, height=620)
+        # Display as individual pages
+        st.markdown("### PDF Document Viewer")
+        
+        # Create an expander for pages
+        with st.expander("View All Pages", expanded=True):
+            for page_num in range(min(len(doc), 10)):  # Limit to first 10 pages for performance
+                page = doc.load_page(page_num)
+                
+                # Render page to an image (higher resolution for better quality)
+                pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+                img_data = pix.tobytes("png")
+                
+                # Display the page image
+                st.markdown(f"**Page {page_num + 1}**")
+                st.image(img_data, caption=f"Page {page_num + 1}", use_column_width=True)
+                st.markdown("---")
+                
+            if len(doc) > 10:
+                st.info(f"Showing first 10 pages of {len(doc)} total pages for performance reasons.")
+        
+        # Close the document
+        doc.close()
         
         # Additional protections warning
         st.info("Note: This document is protected. Screenshots are limited to 3 per 15 minutes and are monitored.")
@@ -101,21 +108,24 @@ def pdf_preview(encrypted_path, max_height=300):
         with open(temp_file_path, 'wb') as f:
             f.write(pdf_data)
         
-        # Convert to base64 for inline display
-        with open(temp_file_path, "rb") as file:
-            base64_pdf = base64.b64encode(file.read()).decode('utf-8')
-            
-        # Use iframe with base64 data for more consistent display
-        pdf_preview = f"""
-        <div style="width:100%; height:{max_height}px; overflow:hidden; border:1px solid #ddd; border-radius:4px;">
-            <iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="{max_height}" 
-                    style="border:none;" frameborder="0">
-            </iframe>
-        </div>
-        """
+        # Convert the PDF to an image for preview
         
-        # Display using streamlit components for preview
-        st.components.v1.html(pdf_preview, height=max_height+20)
+        # Open the PDF with PyMuPDF
+        doc = fitz.open(temp_file_path)
+        
+        if len(doc) > 0:
+            # Get the first page
+            page = doc.load_page(0)
+            
+            # Render page to an image
+            pix = page.get_pixmap(matrix=fitz.Matrix(1.5, 1.5))  # Lower resolution for preview
+            img_data = pix.tobytes("png")
+            
+            # Display the first page as preview
+            st.image(img_data, caption="PDF Preview (Click to view full document)", width=300)
+        
+        # Close the document
+        doc.close()
         
     except Exception as e:
         st.error(f"Error displaying PDF preview: {str(e)}")
