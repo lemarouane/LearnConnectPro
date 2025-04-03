@@ -13,12 +13,141 @@ def student_dashboard():
     db = Database()
     content_manager = ContentManager()
     
-    # Sidebar navigation
-    st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Go to", ["My Courses", "Profile"])
+    # Custom modern sidebar styling for student
+    st.sidebar.markdown("""
+    <style>
+    .sidebar-header {
+        color: #ffffff;
+        background: linear-gradient(135deg, #4CAF50, #2E7D32);
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
     
-    if page == "My Courses":
-        st.header("My Courses")
+    .student-info {
+        text-align: center;
+        margin-bottom: 25px;
+        color: #2E7D32;
+        font-weight: 600;
+        font-size: 16px;
+    }
+    
+    .nav-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        margin: 5px 0;
+        border-radius: 7px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        color: #333;
+        background-color: #f0f7f0;
+    }
+    
+    .nav-item:hover {
+        background-color: #e8f5e9;
+        transform: translateX(5px);
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .nav-item-active {
+        background-color: #4CAF50;
+        color: white;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .nav-item-active:hover {
+        background-color: #388E3C;
+        color: white;
+    }
+    
+    .nav-icon {
+        margin-right: 10px;
+        font-size: 20px;
+        width: 25px;
+        text-align: center;
+    }
+    
+    .sidebar-footer {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        text-align: center;
+        font-size: 12px;
+        color: #777;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+    }
+    
+    /* Animation for icon on hover */
+    .nav-item:hover .nav-icon {
+        transform: scale(1.2);
+        transition: transform 0.3s ease;
+    }
+    
+    /* Override default Streamlit radio button styling */
+    div.row-widget.stRadio > div {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .stRadio > div[role="radiogroup"] > label {
+        display: none !important;
+    }
+    
+    div.row-widget.stRadio > div[role="radiogroup"] {
+        flex-direction: column;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Modern sidebar header
+    st.sidebar.markdown('<div class="sidebar-header"><h2>Plateforme E-Learning</h2></div>', unsafe_allow_html=True)
+    
+    # Student info
+    st.sidebar.markdown(f'<div class="student-info">{st.session_state.full_name or st.session_state.username}<br><small>Étudiant</small></div>', unsafe_allow_html=True)
+    
+    # Create navigation options with icons
+    nav_options = [
+        ("Mes Cours", "📚"),
+        ("Profil", "👤")
+    ]
+    
+    # Hidden radio button for navigation
+    page = st.sidebar.radio(
+        "Go to",
+        [option[0] for option in nav_options],
+        label_visibility="collapsed"
+    )
+    
+    # Custom navigation buttons with icons
+    for option, icon in nav_options:
+        active_class = "nav-item-active" if page == option else ""
+        st.sidebar.markdown(
+            f"""
+            <div class="nav-item {active_class}" 
+                 onclick="document.querySelector('input[type=radio][value=\'{option}\']').click();">
+                <div class="nav-icon">{icon}</div>
+                <div>{option}</div>
+            </div>
+            """, 
+            unsafe_allow_html=True
+        )
+    
+    # Footer
+    st.sidebar.markdown("""
+    <div class="sidebar-footer">
+        <div>Plateforme E-Learning Zouhair</div>
+        <div>© 2025 Tous Droits Réservés</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if page == "Mes Cours":
+        st.header("Mes Cours")
         
         # Get student's assigned levels, subjects, and courses
         user_id = st.session_state.user_id
@@ -98,8 +227,8 @@ def student_dashboard():
         if "view_course_id" in st.session_state and st.session_state.view_course_id:
             display_content_viewer(st.session_state.view_course_id)
     
-    elif page == "Profile":
-        st.header("Student Profile")
+    elif page == "Profil":
+        st.header("Profil Étudiant")
         
         # Display student information
         user = db.get_user_by_id(st.session_state.user_id)

@@ -74,23 +74,142 @@ def admin_dashboard():
     st.markdown('<h1 class="admin-header">Tableau de Bord Administrateur</h1>', unsafe_allow_html=True)
     st.markdown(f'<p class="admin-welcome">Bienvenue, Admin {st.session_state.full_name or st.session_state.username}!</p>', unsafe_allow_html=True)
     
-    # Sidebar navigation with styling
-    st.sidebar.markdown('<h2 style="color: #1565C0;">Panneau Admin</h2>', unsafe_allow_html=True)
+    # Custom modern sidebar styling
+    st.sidebar.markdown("""
+    <style>
+    .sidebar-header {
+        color: #ffffff;
+        background: linear-gradient(135deg, #1565C0, #0D47A1);
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
     
-    # Get admin profile image or use default
-    admin_image = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
-    st.sidebar.image(admin_image, width=100)
-    st.sidebar.markdown(f"<div style='text-align: center; margin-bottom: 20px;'><b>{st.session_state.full_name or st.session_state.username}</b><br>Administrateur</div>", unsafe_allow_html=True)
+    .admin-info {
+        text-align: center;
+        margin-bottom: 25px;
+        color: #0D47A1;
+        font-weight: 600;
+        font-size: 16px;
+    }
     
-    st.sidebar.markdown("<hr>", unsafe_allow_html=True)
+    .nav-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        margin: 5px 0;
+        border-radius: 7px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        color: #333;
+        background-color: #f0f7ff;
+    }
     
+    .nav-item:hover {
+        background-color: #e3f2fd;
+        transform: translateX(5px);
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .nav-item-active {
+        background-color: #1565C0;
+        color: white;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .nav-item-active:hover {
+        background-color: #0D47A1;
+        color: white;
+    }
+    
+    .nav-icon {
+        margin-right: 10px;
+        font-size: 20px;
+        width: 25px;
+        text-align: center;
+    }
+    
+    .sidebar-footer {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        text-align: center;
+        font-size: 12px;
+        color: #777;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+    }
+    
+    /* Animation for icon on hover */
+    .nav-item:hover .nav-icon {
+        transform: scale(1.2);
+        transition: transform 0.3s ease;
+    }
+    
+    /* Override default Streamlit radio button styling */
+    div.row-widget.stRadio > div {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .stRadio > div[role="radiogroup"] > label {
+        display: none !important;
+    }
+    
+    div.row-widget.stRadio > div[role="radiogroup"] {
+        flex-direction: column;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Modern sidebar header
+    st.sidebar.markdown('<div class="sidebar-header"><h2>Plateforme E-Learning</h2></div>', unsafe_allow_html=True)
+    
+    # Admin info without profile image
+    st.sidebar.markdown(f'<div class="admin-info">{st.session_state.full_name or st.session_state.username}<br><small>Administrateur</small></div>', unsafe_allow_html=True)
+    
+    # Create navigation items with icons
+    nav_options = [
+        ("Aperçu du Tableau de Bord", "📊"),
+        ("Gestion du Contenu", "📚"),
+        ("Gestion des Utilisateurs", "👥"),
+        ("Gestion des Niveaux", "🏆"),
+        ("Gestion des Matières", "📝"),
+        ("Journaux d'Activité", "📋")
+    ]
+    
+    # Hidden radio button for navigation state management
     admin_page = st.sidebar.radio(
         "Navigation",
-        ["Aperçu du Tableau de Bord", "Gestion du Contenu", "Gestion des Utilisateurs", "Gestion des Niveaux", "Gestion des Matières", "Journaux d'Activité"]
+        [option[0] for option in nav_options],
+        label_visibility="collapsed"
     )
     
-    st.sidebar.markdown("<hr>", unsafe_allow_html=True)
-    st.sidebar.markdown("<small>Plateforme E-Learning Zouhair<br>© 2025 Tous Droits Réservés</small>", unsafe_allow_html=True)
+    # Custom navigation buttons with icons
+    for option, icon in nav_options:
+        active_class = "nav-item-active" if admin_page == option else ""
+        st.sidebar.markdown(
+            f"""
+            <div class="nav-item {active_class}" 
+                 onclick="document.querySelector('input[type=radio][value=\'{option}\']').click();">
+                <div class="nav-icon">{icon}</div>
+                <div>{option}</div>
+            </div>
+            """, 
+            unsafe_allow_html=True
+        )
+    
+    # Footer
+    st.sidebar.markdown("""
+    <div class="sidebar-footer">
+        <div>Plateforme E-Learning Zouhair</div>
+        <div>© 2025 Tous Droits Réservés</div>
+    </div>
+    """, unsafe_allow_html=True)
     
     if admin_page == "Aperçu du Tableau de Bord":
         dashboard_overview()
