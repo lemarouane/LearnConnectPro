@@ -1575,21 +1575,56 @@ def activity_logs():
     """Activity logs section of the admin dashboard."""
     st.header("Journaux d'Activité")
     
+    # Apply custom styling
+    st.markdown("""
+    <style>
+    .activity-header {
+        color: #1565C0;
+        padding: 1rem 0;
+        border-bottom: 2px solid #1565C0;
+        margin-bottom: 1.5rem;
+    }
+    .metric-card {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    .metric-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #1565C0;
+    }
+    .metric-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     db = Database()
     
-    # Filter options
-    col1, col2 = st.columns(2)
+    # Get all users for filter dropdown
+    users = db.get_all_users()
+    user_options = ["All Users"] + [user["username"] for user in users]
     
-    with col1:
-        # Get all users for filter dropdown
-        users = db.get_all_users()
-        user_options = ["All Users"] + [user["username"] for user in users]
-        selected_user = st.selectbox("Filter by User", user_options)
-    
-    with col2:
-        # Limit number of logs
-        limit_options = [10, 25, 50, 100]
-        selected_limit = st.selectbox("Number of Logs", limit_options, index=1)
+    # Filter options in a container with better styling
+    with st.container():
+        st.markdown("### 📊 Filter Options")
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            selected_user = st.selectbox("👤 Filter by User", user_options)
+        
+        with col2:
+            # Time range filter
+            time_options = ["Last 24 Hours", "Last 7 Days", "Last 30 Days", "All Time"]
+            selected_time = st.selectbox("⏰ Time Range", time_options)
+        
+        with col3:
+            limit_options = [10, 25, 50, 100]
+            selected_limit = st.selectbox("📄 Number of Logs", limit_options, index=1)
     
     # Get filtered logs
     if selected_user == "All Users":
@@ -1598,51 +1633,118 @@ def activity_logs():
         selected_user_id = next((user["id"] for user in users if user["username"] == selected_user), None)
         logs = db.get_activity_logs(limit=selected_limit, user_id=selected_user_id)
     
-    # Display logs
     if not logs:
         st.info("No activity logs found with the selected filters.")
-    else:
-        st.write(f"Showing {len(logs)} recent activity logs")
-        
-        # Create a table for the logs
+        return
+    
+    # Activity Overview Section
+    st.markdown("### 📈 Activity Overview")
+    
+    # Calculate metrics
+    total_logs = len(logs)
+    unique_users = len(set(log['username'] for log in logs))
+    recent_logs = len([log for log in logs if (datetime.now() - datetime.strptime(log['timestamp'], '%Y-%m-%d %H:%M:%S')).days < 1])
+    
+    # Display metrics in cards
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
         st.markdown("""
-        <style>
-        .log-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .log-table th, .log-table td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        .log-table tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        .log-table th {
-            background-color: #4CAF50;
-            color: white;
-        }
-        </style>
+        <div class="metric-card">
+            <div class="metric-value">{}</div>
+            <div class="metric-label">Total Activities</div>
+        </div>
+        """.format(total_logs), unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="metric-card">
+            <div class="metric-value">{}</div>
+            <div class="metric-label">Active Users</div>
+        </div>
+        """.format(unique_users), unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div class="metric-card">
+            <div class="metric-value">{}</div>
+            <div class="metric-label">Recent Activities (24h)</div>
+        </div>
+        """.format(recent_logs), unsafe_allow_html=True)
+    
+    # Create charts
+    st.markdown("### 📊 Activity Analysis")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Activity by user chart
+        user_activity = pd.DataFrame(logs).groupby('username').size().reset_index(name='count')
+        fig_users = px.bar(
+            user_activity,
+            x='username',
+            y='count',
+            title='Activities by User',
+            color='count',
+            color_continuous_scale='blues'
+        )
+        fig_users.update_layout(showlegend=False)
+        st.plotly_chart(fig_users, use_container_width=True)
+    
+    with col2:
+        # Activity timeline
+        df_logs = pd.DataFrame(logs)
+        df_logs['timestamp'] = pd.to_datetime(df_logs['timestamp'])
+        df_logs['date'] = df_logs['timestamp'].dt.date
+        daily_activity = df_logs.groupby('date').size().reset_index(name='count')
         
-        <table class="log-table">
-            <tr>
-                <th>Timestamp</th>
-                <th>User</th>
-                <th>Action</th>
-                <th>Details</th>
-            </tr>
-        """, unsafe_allow_html=True)
-        
-        for log in logs:
-            details = log['details'] or ""
-            st.markdown(f"""
-            <tr>
-                <td>{log['timestamp']}</td>
-                <td>{log['username']}</td>
-                <td>{log['action']}</td>
-                <td>{details}</td>
-            </tr>
-            """, unsafe_allow_html=True)
-        
-        st.markdown("</table>", unsafe_allow_html=True)
+        fig_timeline = px.line(
+            daily_activity,
+            x='date',
+            y='count',
+            title='Activity Timeline',
+            markers=True
+        )
+        fig_timeline.update_traces(line_color='#1565C0')
+        st.plotly_chart(fig_timeline, use_container_width=True)
+    
+    # Display detailed logs in a modern table
+    st.markdown("### 📋 Detailed Activity Logs")
+    
+    # Convert logs to DataFrame for better display
+    df_display = pd.DataFrame(logs)
+    df_display['timestamp'] = pd.to_datetime(df_display['timestamp']).dt.strftime('%Y-%m-%d %H:%M:%S')
+    df_display = df_display[['timestamp', 'username', 'action', 'details']].rename(columns={
+        'timestamp': 'Timestamp',
+        'username': 'User',
+        'action': 'Action',
+        'details': 'Details'
+    })
+    
+    # Style the DataFrame
+    st.dataframe(
+        df_display,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Timestamp": st.column_config.DatetimeColumn(
+                "Timestamp",
+                help="When the activity occurred",
+                format="DD/MM/YYYY HH:mm:ss"
+            ),
+            "User": st.column_config.TextColumn(
+                "User",
+                help="User who performed the action",
+                width="medium"
+            ),
+            "Action": st.column_config.TextColumn(
+                "Action",
+                help="Type of activity",
+                width="large"
+            ),
+            "Details": st.column_config.TextColumn(
+                "Details",
+                help="Additional information",
+                width="large"
+            )
+        }
+    )
