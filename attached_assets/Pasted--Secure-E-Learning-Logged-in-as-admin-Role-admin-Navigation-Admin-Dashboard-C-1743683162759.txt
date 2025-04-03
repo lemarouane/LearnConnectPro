@@ -1,0 +1,78 @@
+
+🔒 Secure E-Learning
+Logged in as: admin
+
+Role: admin
+
+
+Navigation
+
+
+Admin Dashboard
+
+Content Management
+
+
+User Management
+
+
+Activity Logs
+
+Content Management
+Add New Content
+Content Title
+
+mar1
+Content Type
+
+PDF
+Upload File
+
+LE.pdf
+Drag and drop file here
+Limit 200MB per file • PDF
+LE.pdf
+210.5KB
+Category
+
+New Category
+Enter New Category
+
+math
+Difficulty Level
+
+Beginner
+Description
+
+test
+Tags (comma separated)
+
+mar1
+
+AttributeError: 'NoneType' object has no attribute 'finalize'
+Traceback:
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 121, in exec_func_with_error_handling
+    result = func()
+             ^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 640, in code_to_exec
+    exec(code, module.__dict__)
+File "/home/runner/workspace/app.py", line 73, in <module>
+    main()
+File "/home/runner/workspace/app.py", line 68, in main
+    admin_dashboard()
+File "/home/runner/workspace/auth.py", line 103, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/components/admin_dashboard.py", line 21, in admin_dashboard
+    content_management()
+File "/home/runner/workspace/components/admin_dashboard.py", line 37, in content_management
+    add_content_form()
+File "/home/runner/workspace/components/admin_dashboard.py", line 104, in add_content_form
+    original_path, encrypted_path, file_size = save_uploaded_file(uploaded_file)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/utils.py", line 53, in save_uploaded_file
+    encrypted_path = encryption.encrypt_file(file_path, os.path.join(directory, "encrypted"))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/encryption.py", line 52, in encrypt_file
+    hashes.Hash(hashes.SHA256()).update(original_filename.encode()).finalize()
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

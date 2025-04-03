@@ -48,9 +48,13 @@ class FileEncryption:
         
         # Generate a secure filename
         original_filename = os.path.basename(input_path)
-        file_hash = base64.urlsafe_b64encode(
-            hashes.Hash(hashes.SHA256()).update(original_filename.encode()).finalize()
-        ).decode()[:10]
+        
+        # Create a hash object, update it, and then finalize it
+        hash_obj = hashes.Hash(hashes.SHA256())
+        hash_obj.update(original_filename.encode())
+        digest = hash_obj.finalize()
+        
+        file_hash = base64.urlsafe_b64encode(digest).decode()[:10]
         
         encrypted_filename = f"{file_hash}_{original_filename}.enc"
         output_path = os.path.join(output_dir, encrypted_filename)
