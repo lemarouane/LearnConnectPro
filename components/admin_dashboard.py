@@ -959,7 +959,7 @@ def user_management():
 
                         if st.button("✅ Validate", key=f"validate_{student['id']}") or st.session_state[f"validating_{student['id']}"]:
                             st.session_state[f"validating_{student['id']}"] = True
-                            
+
                             # Get all levels and subjects
                             levels = db.get_all_levels()
 
@@ -989,7 +989,7 @@ def user_management():
                                 # Level selection with state persistence
                                     level_names = [level["name"] for level in levels]
                                     current_level_idx = level_names.index(st.session_state[f"selected_level_{student['id']}"]) if st.session_state[f"selected_level_{student['id']}"] in level_names else 0
-                                    
+
                                     selected_level = st.selectbox(
                                         "Select Level",
                                         options=level_names,
@@ -1035,11 +1035,19 @@ def user_management():
                                     courses_by_subject[subject_id] = []
                                     if "All" in selected_courses:
                                         courses_by_subject[subject_id].extend([c["id"] for c in subject_courses])
+
+                                        # Actually assign all courses when "All" is selected
+                                        for course_id in courses_by_subject[subject_id]:
+                                            db.assign_course_to_user(student['id'], course_id)
                                     else:
                                         courses_by_subject[subject_id].extend([
                                             course["id"] for course in subject_courses 
                                             if course["title"] in selected_courses
                                         ])
+
+                                        # Assign selected courses
+                                        for course_id in courses_by_subject[subject_id]:
+                                            db.assign_course_to_user(student['id'], course_id)
 
                                 # Difficulty selection
                                 difficulty = st.selectbox(
