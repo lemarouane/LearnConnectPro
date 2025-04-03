@@ -160,24 +160,22 @@ def admin_dashboard():
         label_visibility="collapsed"
     )
     
-    # Custom navigation using standard Streamlit components with improved styling
+    # Modern sidebar navigation with icons only
     st.sidebar.markdown("<div class='nav-container'>", unsafe_allow_html=True)
     
     for i, (option, icon) in enumerate(nav_options):
+        button_style = "primary" if admin_page == option else "secondary"
         if st.sidebar.button(
             f"{icon} {option}",
             key=f"nav_{i}",
-            on_click=lambda o=option: st.session_state.update({"admin_page": o}),
             use_container_width=True,
-            type="primary" if admin_page == option else "secondary"
+            type=button_style
         ):
+            st.session_state.admin_page = option
             admin_page = option
+            st.rerun()
             
     st.sidebar.markdown("</div>", unsafe_allow_html=True)
-    
-    # Make sure admin_page is always a session variable
-    if "admin_page" in st.session_state:
-        admin_page = st.session_state.admin_page
         
     # Footer with extra space to prevent overlap
     st.sidebar.markdown("<div style='height: 80px;'></div>", unsafe_allow_html=True)
@@ -958,16 +956,104 @@ def user_management():
                     with col2:
                         st.markdown("<br><br>", unsafe_allow_html=True)
                         if st.button("✅ Validate", key=f"validate_{student['id']}"):
-                            if db.validate_user(student['id'], validate=True):
-                                # Log activity
-                                db.log_activity(
-                                    st.session_state.user_id,
-                                    f"Validated student account: {student['username']}"
+                            # Get all levels and subjects
+                            levels = db.get_all_levels()
+                            
+                            # Create modal for validation
+                            st.markdown("""
+                            <style>
+                            .validation-modal {
+                                background: white;
+                                padding: 20px;
+                                border-radius: 10px;
+                                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                                margin: 20px 0;
+                            }
+                            </style>
+                            """, unsafe_allow_html=True)
+                            
+                            with st.container():
+                                st.markdown("<div class='validation-modal'>", unsafe_allow_html=True)
+                                st.subheader(f"Validate {student['username']}")
+                                
+                                # Level selection
+                                selected_level = st.selectbox(
+                                    "Select Level",
+                                    options=[level["name"] for level in levels],
+                                    key=f"level_{student['id']}"
                                 )
-                                st.success(f"User {student['username']} validated successfully.")
-                                st.rerun()
-                            else:
-                                st.error("Failed to validate user.")
+                                
+                                # Get level ID
+                                selected_level_id = next(level["id"] for level in levels if level["name"] == selected_level)
+                                
+                                # Get subjects for selected level
+                                subjects = db.get_all_subjects(level_id=selected_level_id)
+                                
+                                # Subject multiselect
+                                selected_subjects = st.multiselect(
+                                    "Select Subjects",
+                                    options=[subject["name"] for subject in subjects],
+                                    key=f"subjects_{student['id']}"
+                                )
+                                
+                                # Get selected subject IDs
+                                selected_subject_ids = [
+                                    subject["id"] for subject in subjects 
+                                    if subject["name"] in selected_subjects
+                                ]
+                                
+                                # Course selection for each subject
+                                courses_by_subject = {}
+                                for subject_id in selected_subject_ids:
+                                    subject_courses = db.get_all_courses(subject_id=subject_id)
+                                    subject_name = next(s["name"] for s in subjects if s["id"] == subject_id)
+                                    
+                                    st.markdown(f"**Courses for {subject_name}:**")
+                                    course_options = ["All"] + [course["title"] for course in subject_courses]
+                                    selected_courses = st.multiselect(
+                                        f"Select courses for {subject_name}",
+                                        options=course_options,
+                                        key=f"courses_{student['id']}_{subject_id}"
+                                    )
+                                    
+                                    if "All" in selected_courses:
+                                        courses_by_subject[subject_id] = [c["id"] for c in subject_courses]
+                                    else:
+                                        courses_by_subject[subject_id] = [
+                                            course["id"] for course in subject_courses 
+                                            if course["title"] in selected_courses
+                                        ]
+                                
+                                # Difficulty selection
+                                difficulty = st.selectbox(
+                                    "Select Difficulty",
+                                    options=["Beginner", "Intermediate", "Advanced"],
+                                    key=f"difficulty_{student['id']}"
+                                )
+                                
+                                if st.button("Confirm Validation", key=f"confirm_{student['id']}"):
+                                    # Validate user
+                                    if db.validate_user(student['id'], validate=True):
+                                        # Assign level
+                                        db.assign_level_to_user(student['id'], selected_level_id)
+                                        
+                                        # Assign subjects and courses
+                                        for subject_id in selected_subject_ids:
+                                            db.assign_subject_to_user(student['id'], subject_id)
+                                            for course_id in courses_by_subject[subject_id]:
+                                                db.assign_course_to_user(student['id'], course_id)
+                                        
+                                        # Log activity
+                                        db.log_activity(
+                                            st.session_state.user_id,
+                                            f"Validated and assigned student {student['username']} to level {selected_level}"
+                                        )
+                                        st.success(f"User {student['username']} validated and assigned successfully.")
+                                        st.rerun()
+                                    else:
+                                        st.error("Failed to validate user.")
+                                
+                                st.markdown("</div>", unsafe_allow_html=True)
                         
                         if st.button("🗑️ Delete", key=f"delete_pending_{student['id']}"):
                             if db.delete_user(student['id']):
