@@ -95,73 +95,44 @@ def admin_dashboard():
         font-size: 16px;
     }
     
-    .nav-item {
-        display: flex;
-        align-items: center;
-        padding: 10px 15px;
-        margin: 5px 0;
+    /* Style for buttons in the sidebar */
+    .nav-container {
+        margin-bottom: 80px;  /* Space for footer */
+    }
+    
+    .stButton > button {
+        text-align: left !important;
+        margin-bottom: 5px;
         border-radius: 7px;
         transition: all 0.3s ease;
-        cursor: pointer;
-        text-decoration: none;
-        color: #333;
-        background-color: #f0f7ff;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        width: 100%;
     }
     
-    .nav-item:hover {
-        background-color: #e3f2fd;
+    .stButton > button:hover {
         transform: translateX(5px);
-        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
     
-    .nav-item-active {
+    .stButton > button[data-baseweb="button"][kind="primary"] {
         background-color: #1565C0;
         color: white;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
     
-    .nav-item-active:hover {
+    .stButton > button[data-baseweb="button"][kind="primary"]:hover {
         background-color: #0D47A1;
-        color: white;
     }
     
-    .nav-icon {
-        margin-right: 10px;
-        font-size: 20px;
-        width: 25px;
-        text-align: center;
+    .stButton > button[data-baseweb="button"][kind="secondary"] {
+        background-color: #f0f7ff;
+        color: #333;
+        border: 1px solid #e0e0e0;
     }
     
-    .sidebar-footer {
-        position: absolute;
-        bottom: 20px;
-        left: 20px;
-        right: 20px;
-        text-align: center;
-        font-size: 12px;
-        color: #777;
-        padding-top: 10px;
-        border-top: 1px solid #eee;
-    }
-    
-    /* Animation for icon on hover */
-    .nav-item:hover .nav-icon {
-        transform: scale(1.2);
-        transition: transform 0.3s ease;
-    }
-    
-    /* Override default Streamlit radio button styling */
-    div.row-widget.stRadio > div {
-        flex-direction: column;
-        gap: 5px;
-    }
-    
-    .stRadio > div[role="radiogroup"] > label {
-        display: none !important;
-    }
-    
-    div.row-widget.stRadio > div[role="radiogroup"] {
-        flex-direction: column;
+    .stButton > button[data-baseweb="button"][kind="secondary"]:hover {
+        background-color: #e3f2fd;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -189,23 +160,29 @@ def admin_dashboard():
         label_visibility="collapsed"
     )
     
-    # Custom navigation buttons with icons
-    for option, icon in nav_options:
-        active_class = "nav-item-active" if admin_page == option else ""
-        st.sidebar.markdown(
-            f"""
-            <div class="nav-item {active_class}" 
-                 onclick="document.querySelector('input[type=radio][value=\'{option}\']').click();">
-                <div class="nav-icon">{icon}</div>
-                <div>{option}</div>
-            </div>
-            """, 
-            unsafe_allow_html=True
-        )
+    # Custom navigation using standard Streamlit components with improved styling
+    st.sidebar.markdown("<div class='nav-container'>", unsafe_allow_html=True)
     
-    # Footer
+    for i, (option, icon) in enumerate(nav_options):
+        if st.sidebar.button(
+            f"{icon} {option}",
+            key=f"nav_{i}",
+            on_click=lambda o=option: st.session_state.update({"admin_page": o}),
+            use_container_width=True,
+            type="primary" if admin_page == option else "secondary"
+        ):
+            admin_page = option
+            
+    st.sidebar.markdown("</div>", unsafe_allow_html=True)
+    
+    # Make sure admin_page is always a session variable
+    if "admin_page" in st.session_state:
+        admin_page = st.session_state.admin_page
+        
+    # Footer with extra space to prevent overlap
+    st.sidebar.markdown("<div style='height: 80px;'></div>", unsafe_allow_html=True)
     st.sidebar.markdown("""
-    <div class="sidebar-footer">
+    <div style="position: fixed; bottom: 20px; left: 20px; right: 20px; text-align: center; font-size: 12px; color: #777; padding-top: 10px; border-top: 1px solid #eee;">
         <div>Plateforme E-Learning Zouhair</div>
         <div>© 2025 Tous Droits Réservés</div>
     </div>
