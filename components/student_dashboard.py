@@ -13,19 +13,19 @@ def student_dashboard():
     db = Database()
     content_manager = ContentManager()
     
-    # Sidebar navigation
-    st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Go to", ["My Courses", "Profile"])
+    # Get student's assigned levels, subjects, and courses
+    user_id = st.session_state.user_id
     
-    if page == "My Courses":
+    # Get levels and subjects
+    user_levels = db.get_user_levels(user_id)
+    user_subjects = db.get_user_subjects(user_id)
+    
+    # Use student_page from session state for navigation
+    if 'student_page' not in st.session_state:
+        st.session_state.student_page = "My Courses"
+    
+    if st.session_state.student_page == "My Courses":
         st.header("My Courses")
-        
-        # Get student's assigned levels, subjects, and courses
-        user_id = st.session_state.user_id
-        
-        # Get levels and subjects
-        user_levels = db.get_user_levels(user_id)
-        user_subjects = db.get_user_subjects(user_id)
         
         if not user_levels:
             st.info("You haven't been assigned to any levels yet. Please check back later.")
@@ -90,7 +90,7 @@ def student_dashboard():
         if "view_course_id" in st.session_state and st.session_state.view_course_id:
             display_content_viewer(st.session_state.view_course_id)
     
-    elif page == "Profile":
+    elif st.session_state.student_page == "Profile":
         st.header("Student Profile")
         
         # Display student information

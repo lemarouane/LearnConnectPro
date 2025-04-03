@@ -29,10 +29,11 @@ def apply_custom_styles():
         color: #1E293B;
     }
     
-    /* Sidebar styles */
+    /* Improved Sidebar styles */
     [data-testid="stSidebar"] {
-        background-color: #1E293B;
+        background: linear-gradient(180deg, #1E293B 0%, #111827 100%);
         color: white;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     }
     
     [data-testid="stSidebar"] button {
@@ -40,93 +41,232 @@ def apply_custom_styles():
         color: white !important;
         text-align: left !important;
         font-weight: normal !important;
-        border-radius: 4px !important;
-        margin-bottom: 0.25rem !important;
+        border-radius: 8px !important;
+        margin-bottom: 0.5rem !important;
         border: none !important;
-        padding: 0.5rem 1rem !important;
+        padding: 0.75rem 1rem !important;
+        transition: all 0.3s ease !important;
     }
     
     [data-testid="stSidebar"] button:hover {
-        background-color: rgba(255, 255, 255, 0.1) !important;
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        transform: translateX(3px);
     }
     
     [data-testid="stSidebar"] h3 {
         color: #94A3B8 !important;
-        font-size: 0.8rem !important;
+        font-size: 0.85rem !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.05rem !important;
+        letter-spacing: 0.075rem !important;
         margin-top: 1.5rem !important;
-        margin-bottom: 0.5rem !important;
+        margin-bottom: 0.75rem !important;
+        font-weight: 600 !important;
     }
 
-    /* Card styles */
+    /* Modernized Card styles */
     .card {
-        padding: 1.5rem;
-        border-radius: 8px;
+        padding: 1.75rem;
+        border-radius: 12px;
         background-color: white;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        margin-bottom: 1.2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
         border-top: 4px solid #6366F1;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     
-    /* Notification styles */
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    /* Enhanced Notification styles */
     .notification {
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1rem;
+        padding: 1.25rem;
+        border-radius: 10px;
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: flex-start;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .notification::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
     }
     
     .notification-info {
         background-color: #EFF6FF;
-        border-left: 4px solid #3B82F6;
         color: #1E40AF;
+    }
+    
+    .notification-info::before {
+        background-color: #3B82F6;
     }
     
     .notification-success {
         background-color: #ECFDF5;
-        border-left: 4px solid #10B981;
         color: #065F46;
+    }
+    
+    .notification-success::before {
+        background-color: #10B981;
     }
     
     .notification-warning {
         background-color: #FFFBEB;
-        border-left: 4px solid #F59E0B;
         color: #92400E;
+    }
+    
+    .notification-warning::before {
+        background-color: #F59E0B;
     }
     
     .notification-error {
         background-color: #FEF2F2;
-        border-left: 4px solid #EF4444;
         color: #B91C1C;
     }
     
-    /* Table styles */
+    .notification-error::before {
+        background-color: #EF4444;
+    }
+    
+    /* Refined Table styles */
     [data-testid="stTable"] {
-        border-radius: 8px;
+        border-radius: 12px;
         overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
     
     [data-testid="stTable"] th {
-        background-color: #F1F5F9;
-        color: #475569;
+        background-color: #F8FAFC;
+        color: #334155;
         font-weight: 600;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
     }
     
-    /* Button styles */
+    [data-testid="stTable"] td {
+        padding: 12px 16px;
+        border-bottom: 1px solid #F1F5F9;
+    }
+    
+    /* Enhanced Button styles */
     [data-testid="stButton"] button {
-        border-radius: 4px;
+        font-weight: 600 !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+        padding: 0.5rem 1.25rem !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+    }
+    
+    [data-testid="stButton"] button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Modern Input field styles */
+    [data-testid="stTextInput"] input, 
+    [data-testid="stNumberInput"] input,
+    [data-testid="stFileUploader"] .uploadInput,
+    [data-testid="stSelectbox"] > div > div {
+        border-radius: 8px !important;
+        border: 1px solid #E2E8F0 !important;
+        padding: 0.75rem !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    [data-testid="stTextInput"] input:focus, 
+    [data-testid="stNumberInput"] input:focus,
+    [data-testid="stFileUploader"] .uploadInput:focus,
+    [data-testid="stSelectbox"] > div > div:focus {
+        border-color: #6366F1 !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+    }
+    
+    /* Content Card Styles */
+    .content-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+        border-left: 5px solid #4F46E5;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .content-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .content-card-header {
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #F1F5F9;
+    }
+    
+    /* Stat Card Styles */
+    .stat-card {
+        background: linear-gradient(135deg, #4F46E5, #818CF8);
+        color: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.2);
+        text-align: center;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(79, 70, 229, 0.3);
+    }
+    
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 10px 0;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
         font-weight: 500;
     }
     
-    /* Input field styles */
-    [data-testid="stTextInput"] input, 
-    [data-testid="stNumberInput"] input,
-    [data-testid="stFileUploader"] .uploadInput {
-        border-radius: 4px;
-        border: 1px solid #E2E8F0;
+    /* Enhanced Headers */
+    h1 {
+        color: #1E293B;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        margin-bottom: 1.5rem;
     }
     
-    /* Scrollbar styles */
+    h2 {
+        color: #334155;
+        font-weight: 700;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    h3 {
+        color: #475569;
+        font-weight: 600;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    /* Improved Scrollbar styles */
     ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
@@ -134,11 +274,12 @@ def apply_custom_styles():
     
     ::-webkit-scrollbar-track {
         background: #F1F5F9;
+        border-radius: 8px;
     }
     
     ::-webkit-scrollbar-thumb {
         background: #CBD5E1;
-        border-radius: 4px;
+        border-radius: 8px;
     }
     
     ::-webkit-scrollbar-thumb:hover {
@@ -187,52 +328,176 @@ def render_sidebar_menu():
     st.sidebar.markdown(f"**Role:** {role}")
     st.sidebar.markdown("---")
     
+    # Initialize admin_page session state if not exists
+    if 'admin_page' not in st.session_state:
+        st.session_state.admin_page = "Dashboard Overview"
+    
     # Define menu items based on user role
     if st.session_state.role == "admin":
-        # Admin menu items
-        st.sidebar.markdown("### Admin Navigation")
-        if st.sidebar.button("📊 Dashboard", key="menu_dashboard", use_container_width=True):
-            st.session_state.menu_selection = "dashboard"
+        # Admin menu items with improved styling using HTML/CSS
+        st.sidebar.markdown("""
+        <style>
+        .sidebar-menu {
+            margin-bottom: 10px;
+        }
+        .menu-item {
+            display: block;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(3px);
+        }
+        .menu-item.active {
+            background-color: #4F46E5;
+            color: white;
+            font-weight: 600;
+        }
+        .menu-icon {
+            margin-right: 10px;
+            width: 16px;
+            text-align: center;
+            display: inline-block;
+        }
+        </style>
+        """, unsafe_allow_html=True)
         
-        if st.sidebar.button("📚 Content Management", key="menu_content", use_container_width=True):
-            st.session_state.menu_selection = "content"
+        st.sidebar.markdown("### Admin Navigation", unsafe_allow_html=True)
         
-        if st.sidebar.button("👥 User Management", key="menu_users", use_container_width=True):
-            st.session_state.menu_selection = "users"
+        # Admin menu options with event handlers
+        menu_items = {
+            "Dashboard Overview": "📊",
+            "Content Management": "📚",
+            "User Management": "👥",
+            "Level Management": "🏫",
+            "Subject Management": "📑",
+            "Activity Logs": "📝",
+            "Settings": "⚙️"
+        }
         
-        if st.sidebar.button("🏫 Level Management", key="menu_levels", use_container_width=True):
-            st.session_state.menu_selection = "levels"
-        
-        if st.sidebar.button("📑 Subject Management", key="menu_subjects", use_container_width=True):
-            st.session_state.menu_selection = "subjects"
-        
-        if st.sidebar.button("📝 Activity Logs", key="menu_activity", use_container_width=True):
-            st.session_state.menu_selection = "activity"
-        
-        if st.sidebar.button("⚙️ Settings", key="menu_settings", use_container_width=True):
-            st.session_state.menu_selection = "settings"
+        for menu_item, icon in menu_items.items():
+            active_class = "active" if st.session_state.admin_page == menu_item else ""
+            if st.sidebar.markdown(f"""
+            <div class="menu-item {active_class}" id="{menu_item.replace(' ', '_')}">
+                <span class="menu-icon">{icon}</span> {menu_item}
+            </div>
+            """, unsafe_allow_html=True):
+                st.session_state.admin_page = menu_item
+                st.rerun()
     else:
-        # Student menu items - no content management or admin options
-        st.sidebar.markdown("### Student Navigation")
-        if st.sidebar.button("📚 My Courses", key="menu_dashboard", use_container_width=True):
-            st.session_state.menu_selection = "dashboard"
+        # Student menu items with improved styling
+        st.sidebar.markdown("""
+        <style>
+        .sidebar-menu {
+            margin-bottom: 10px;
+        }
+        .menu-item {
+            display: block;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(3px);
+        }
+        .menu-item.active {
+            background-color: #4F46E5;
+            color: white;
+            font-weight: 600;
+        }
+        .menu-icon {
+            margin-right: 10px;
+            width: 16px;
+            text-align: center;
+            display: inline-block;
+        }
+        </style>
+        """, unsafe_allow_html=True)
         
-        if st.sidebar.button("👤 Profile", key="menu_profile", use_container_width=True):
-            st.session_state.menu_selection = "profile"
+        st.sidebar.markdown("### Student Navigation", unsafe_allow_html=True)
         
-        if st.sidebar.button("⚙️ Settings", key="menu_settings", use_container_width=True):
-            st.session_state.menu_selection = "settings"
+        # Check if student_page exists in session state
+        if 'student_page' not in st.session_state:
+            st.session_state.student_page = "My Courses"
+        
+        # Student menu options
+        student_menu = {
+            "My Courses": "📚",
+            "Profile": "👤",
+            "Settings": "⚙️"
+        }
+        
+        for menu_item, icon in student_menu.items():
+            active_class = "active" if st.session_state.student_page == menu_item else ""
+            if st.sidebar.markdown(f"""
+            <div class="menu-item {active_class}" id="{menu_item.replace(' ', '_')}">
+                <span class="menu-icon">{icon}</span> {menu_item}
+            </div>
+            """, unsafe_allow_html=True):
+                st.session_state.student_page = menu_item
+                st.rerun()
     
     # Add a separator
     st.sidebar.markdown("---")
     
-    # Logout button at the bottom
-    if st.sidebar.button("🚪 Logout", key="menu_logout", use_container_width=True):
+    # Logout button at the bottom with improved styling
+    logout_clicked = st.sidebar.markdown("""
+    <div class="menu-item" style="background-color: rgba(239, 68, 68, 0.2); color: white;">
+        <span class="menu-icon">🚪</span> Logout
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if logout_clicked:
         from auth import logout_user
         logout_user()
         st.rerun()
     
-    return st.session_state.get('menu_selection', 'dashboard')
+    # Use JavaScript to make the menu items clickable
+    st.sidebar.markdown("""
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const stateUpdate = {
+                    menuSelection: item.id.replace('_', ' ')
+                };
+                window.parent.postMessage({
+                    type: 'streamlit:setComponentValue',
+                    value: stateUpdate
+                }, '*');
+            });
+        });
+    });
+    </script>
+    """, unsafe_allow_html=True)
+    
+    # For admin, return the admin_page value
+    if st.session_state.role == "admin":
+        return st.session_state.admin_page
+    else:
+        # For student, map to the appropriate menu_selection value
+        menu_mapping = {
+            "My Courses": "dashboard",
+            "Profile": "profile",
+            "Settings": "settings"
+        }
+        return menu_mapping.get(st.session_state.student_page, "dashboard")
 
 def create_card(title, content, color="#6366F1"):
     """Create a styled card with the given title and content"""

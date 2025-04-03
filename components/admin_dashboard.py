@@ -74,36 +74,30 @@ def admin_dashboard():
     st.markdown('<h1 class="admin-header">Admin Dashboard</h1>', unsafe_allow_html=True)
     st.markdown(f'<p class="admin-welcome">Welcome, Admin {st.session_state.full_name or st.session_state.username}!</p>', unsafe_allow_html=True)
     
-    # Sidebar navigation with styling
-    st.sidebar.markdown('<h2 style="color: #1565C0;">Admin Panel</h2>', unsafe_allow_html=True)
+    # Display appropriate page based on admin_page session state variable
+    # This value comes from the sidebar menu in components/ui.py
     
-    # Get admin profile image or use default
-    admin_image = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
-    st.sidebar.image(admin_image, width=100)
-    st.sidebar.markdown(f"<div style='text-align: center; margin-bottom: 20px;'><b>{st.session_state.full_name or st.session_state.username}</b><br>Administrator</div>", unsafe_allow_html=True)
+    # Check if admin_page is in session state
+    if 'admin_page' not in st.session_state:
+        st.session_state.admin_page = "Dashboard Overview"
     
-    st.sidebar.markdown("<hr>", unsafe_allow_html=True)
-    
-    admin_page = st.sidebar.radio(
-        "Navigation",
-        ["Dashboard Overview", "Content Management", "User Management", "Level Management", "Subject Management", "Activity Logs"]
-    )
-    
-    st.sidebar.markdown("<hr>", unsafe_allow_html=True)
-    st.sidebar.markdown("<small>Zouhair E-Learning Platform<br>© 2025 All Rights Reserved</small>", unsafe_allow_html=True)
-    
-    if admin_page == "Dashboard Overview":
+    # Display the selected page based on admin_page value
+    if st.session_state.admin_page == "Dashboard Overview":
         dashboard_overview()
-    elif admin_page == "Content Management":
+    elif st.session_state.admin_page == "Content Management":
         content_management()
-    elif admin_page == "User Management":
+    elif st.session_state.admin_page == "User Management":
         user_management()
-    elif admin_page == "Level Management":
+    elif st.session_state.admin_page == "Level Management":
         level_management()
-    elif admin_page == "Subject Management":
+    elif st.session_state.admin_page == "Subject Management":
         subject_management()
-    elif admin_page == "Activity Logs":
+    elif st.session_state.admin_page == "Activity Logs":
         activity_logs()
+    elif st.session_state.admin_page == "Settings":
+        # Add settings page if implemented
+        st.header("Settings")
+        st.info("Settings page is under development.")
         
 def dashboard_overview():
     """Dashboard overview with statistics and charts."""
