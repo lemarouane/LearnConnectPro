@@ -949,7 +949,17 @@ def user_management():
 
                     with col2:
                         st.markdown("<br><br>", unsafe_allow_html=True)
-                        if st.button("✅ Validate", key=f"validate_{student['id']}"):
+                        # Initialize session state for this student if not exists
+                        if f"validating_{student['id']}" not in st.session_state:
+                            st.session_state[f"validating_{student['id']}"] = False
+                            st.session_state[f"selected_level_{student['id']}"] = None
+                            st.session_state[f"selected_subjects_{student['id']}"] = []
+                            st.session_state[f"selected_courses_{student['id']}"] = {}
+                            st.session_state[f"selected_difficulty_{student['id']}"] = None
+
+                        if st.button("✅ Validate", key=f"validate_{student['id']}") or st.session_state[f"validating_{student['id']}"]:
+                            st.session_state[f"validating_{student['id']}"] = True
+                            
                             # Get all levels and subjects
                             levels = db.get_all_levels()
 
@@ -963,32 +973,44 @@ def user_management():
                                 box-shadow: 0 0 10px rgba(0,0,0,0.1);
                                 margin: 20px 0;
                             }
+                            .validation-modal .stSelectbox, 
+                            .validation-modal .stMultiSelect {
+                                margin-bottom: 15px;
+                            }
                             </style>
                             """, unsafe_allow_html=True)
 
                             with st.container():
-                                st.markdown("<div class='validation-modal'>", unsafe_allow_html=True)
-                                st.subheader(f"Validate {student['username']}")
+                                modal_col1, modal_col2 = st.columns([3, 1])
+                                with modal_col1:
+                                    st.markdown("<div class='validation-modal'>", unsafe_allow_html=True)
+                                    st.subheader(f"Validate {student['username']}")
 
-                                # Level selection
-                                selected_level = st.selectbox(
-                                    "Select Level",
-                                    options=[level["name"] for level in levels],
-                                    key=f"level_{student['id']}"
-                                )
+                                # Level selection with state persistence
+                                    level_names = [level["name"] for level in levels]
+                                    current_level_idx = level_names.index(st.session_state[f"selected_level_{student['id']}"]) if st.session_state[f"selected_level_{student['id']}"] in level_names else 0
+                                    
+                                    selected_level = st.selectbox(
+                                        "Select Level",
+                                        options=level_names,
+                                        key=f"level_select_{student['id']}",
+                                        index=current_level_idx
+                                    )
+                                    st.session_state[f"selected_level_{student['id']}"] = selected_level
 
-                                # Get level ID
-                                selected_level_id = next(level["id"] for level in levels if level["name"] == selected_level)
+                                    # Get level ID and subjects
+                                    selected_level_id = next(level["id"] for level in levels if level["name"] == selected_level)
+                                    subjects = db.get_all_subjects(level_id=selected_level_id)
+                                    subject_names = [subject["name"] for subject in subjects]
 
-                                # Get subjects for selected level
-                                subjects = db.get_all_subjects(level_id=selected_level_id)
-
-                                # Subject multiselect
-                                selected_subjects = st.multiselect(
-                                    "Select Subjects",
-                                    options=[subject["name"] for subject in subjects],
-                                    key=f"subjects_{student['id']}"
-                                )
+                                    # Subject multiselect with state persistence
+                                    selected_subjects = st.multiselect(
+                                        "Select Subjects",
+                                        options=subject_names,
+                                        default=st.session_state[f"selected_subjects_{student['id']}"],
+                                        key=f"subjects_select_{student['id']}"
+                                    )
+                                    st.session_state[f"selected_subjects_{student['id']}"] = selected_subjects
 
                                 # Get selected subject IDs
                                 selected_subject_ids = [
@@ -1025,9 +1047,20 @@ def user_management():
                                     key=f"difficulty_{student['id']}"
                                 )
 
-                                if st.button("Confirm Validation", key=f"confirm_{student['id']}"):
-                                    # Validate user
-                                    if db.validate_user(student['id'], validate=True):
+                                col1, col2 = st.columns([1, 1])
+                                    with col1:
+                                        if st.button("Confirm Validation", key=f"confirm_{student['id']}", type="primary"):
+                                            # Validate user
+                                            if db.validate_user(student['id'], validate=True):
+                                    with col2:
+                                        if st.button("Cancel", key=f"cancel_{student['id']}"):
+                                            # Reset validation state
+                                            st.session_state[f"validating_{student['id']}"] = False
+                                            st.session_state[f"selected_level_{student['id']}"] = None
+                                            st.session_state[f"selected_subjects_{student['id']}"] = []
+                                            st.session_state[f"selected_courses_{student['id']}"] = {}
+                                            st.session_state[f"selected_difficulty_{student['id']}"] = None
+                                            st.rerun()
                                         # Assign level
                                         db.assign_level_to_user(student['id'], selected_level_id)
 
