@@ -1059,15 +1059,37 @@ def user_management():
                                 col1, col2 = st.columns([1, 1])
                                 with col1:
                                     if st.button("Confirm Validation", key=f"confirm_{student['id']}", type="primary"):
-                                        # Validate user
+                                        # Validate selections
+                                        if not selected_level_id:
+                                            st.error("Please select a level before validating.")
+                                            return
+                                        if not selected_subjects:
+                                            st.error("Please select at least one subject before validating.")
+                                            return
+                                        if not any(courses_by_subject.values()):
+                                            st.error("Please select at least one course before validating.")
+                                            return
+
+                                        # Assign level
+                                        db.assign_level_to_user(student['id'], selected_level_id)
+
+                                        # Assign subjects and courses
+                                        for subject_id in selected_subject_ids:
+                                            db.assign_subject_to_user(student['id'], subject_id)
+                                            for course_id in courses_by_subject[subject_id]:
+                                                db.assign_course_to_user(student['id'], course_id)
+
+                                        # Finally validate the user
                                         if db.validate_user(student['id'], validate=True):
                                             # Log activity
                                             db.log_activity(
                                                 st.session_state.user_id,
-                                                f"Validated and assigned student {student['username']}"
+                                                f"Validated and assigned student {student['username']} to level {selected_level}"
                                             )
-                                            st.success(f"User {student['username']} validated successfully.")
+                                            st.success(f"User {student['username']} validated and assigned successfully.")
                                             st.rerun()
+                                        else:
+                                            st.error("Failed to validate user.")
                                 with col2:
                                     if st.button("Cancel", key=f"cancel_{student['id']}"):
                                         # Reset validation state
