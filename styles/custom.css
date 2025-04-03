@@ -1,0 +1,67 @@
+.card {
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 10px 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath fill='white' fill-opacity='0.2' d='M0,0 L100,0 L0,100 Z'%3E%3C/path%3E%3C/svg%3E");
+    background-size: cover;
+    opacity: 0.2;
+}
+
+.card-text {
+    color: white;
+    text-transform: uppercase;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 1px;
+    position: relative;
+    z-index: 1;
+}
+
+.admin-card {
+    background: linear-gradient(45deg, #6b5bff, #4ecdc4);
+}
+
+.student-card {
+    background: linear-gradient(45deg, #ff6b6b, #ffbe0b);
+}
+
+.stButton > button {
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.stButton > button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(78, 205, 196, 0.5);
+}
+
+.secure-icon {
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.content-preview {
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+/* Radial gradient background for main app */
+.main-bg {
+    background: radial-gradient(circle at center, #f8f9fa, #e9ecef);
+    padding: 20px;
+    border-radius: 15px;
+}
